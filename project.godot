@@ -15,12 +15,24 @@ _global_script_classes=[ {
 "path": "res://src/demo/Assembler.gd"
 }, {
 "base": "Reference",
+"class": "GutHookScript",
+"language": "GDScript",
+"path": "res://addons/gut/hook_script.gd"
+}, {
+"base": "Node",
+"class": "GutTest",
+"language": "GDScript",
+"path": "res://addons/gut/test.gd"
+}, {
+"base": "Reference",
 "class": "Opcodes",
 "language": "GDScript",
 "path": "res://src/cpu/Opcodes.gd"
 } ]
 _global_script_class_icons={
 "Assembler": "",
+"GutHookScript": "",
+"GutTest": "",
 "Opcodes": ""
 }
 
