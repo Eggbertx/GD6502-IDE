@@ -22,7 +22,7 @@
 	"should_exit": false,
 	"should_exit_on_success": false,
 	"should_maximize": false,
-	"compact_mode": false,
+	"compact_mode": true,
 	"show_help": false,
 	"suffix": ".gd",
 	"tests": [],

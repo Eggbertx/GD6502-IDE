@@ -27,4 +27,4 @@ func test_invalids():
 	var success = asm.assemble()
 	# todo: come up with a more reliable way of doing this, since a null byte array could also be
 	# returned if the cleaned source code is empty
-	assert_false(success, "Testing GD6502 syntax validation")
+	assert_ne(success, OK, "Testing GD6502 syntax validation")

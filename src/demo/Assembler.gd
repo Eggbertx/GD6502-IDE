@@ -294,27 +294,25 @@ func assemble():
 	label_refs.clear()
 
 	if asm_str == "":
-		return true
+		return OK
 	var lines = asm_str.split("\n")
 	current_pc = start_pc
 	for l in range(lines.size()):
 		var line_str = lines[l]
 		var success = assemble_line(line_str)
-		var failed = true
 		match success:
 			INVALID_SYNTAX:
 				debug_print("Invalid syntax on line #%d: %s" % [l+1, line_str])
+				return INVALID_SYNTAX
 			Opcodes.INVALID_ADDRESS_MODE:
 				debug_print("Invalid addressing mode on line #%d: %s" % [l+1, line_str])
+				return Opcodes.INVALID_ADDRESS_MODE
 			Opcodes.UNDEFINED_OPCODE:
 				debug_print("Unrecognized opcode on line #%d: %s" % [l+1, line_str])
-			_:
-				failed = false
-		if failed:
-			debug_print("Failed assembling code")
-			return false
-	# update_labels()
+				return Opcodes.UNDEFINED_OPCODE
+
+	update_labels()
 	if logger.has_method("write_linebreak"):
 		logger.write_linebreak()
 	print_hexdump()
-	return true
+	return OK

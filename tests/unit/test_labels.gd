@@ -17,7 +17,7 @@ var bytes = PoolByteArray([0xea, 0xad, 0x00, 0x06, 0x4c, 0x0a, 0x06, 0x4c, 0xff,
 func test_labels():
 	asm.asm_str = labels_str
 	var success = asm.assemble()
-	assert_true(success, "Assemble label testing code")
+	assert_eq(success, OK, "Assemble label testing code")
 
 	# test to make sure that the labels have been properly updated
 	# TODO: take *=addr into account
