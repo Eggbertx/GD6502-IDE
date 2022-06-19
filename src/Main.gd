@@ -71,9 +71,9 @@ func open_rom(path):
 func _on_UI_file_item_selected(id):
 	match id:
 		FILE_OPEN_FILE:
-			$UI.open_file(false)
+			$UI.open_file_dialog(false)
 		FILE_OPEN_EXAMPLE:
-			$UI.open_file(true)
+			$UI.open_file_dialog(true)
 		FILE_QUIT:
 			get_tree().quit(0)
 
