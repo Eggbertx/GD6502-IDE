@@ -22,7 +22,7 @@ func _ready():
 func pixel_size():
 	return get_viewport().size.x / screen_size
 
-func open_file(examples = true):
+func open_file_dialog(examples = true):
 	if $FileDialog.visible:
 		return
 	if examples:
@@ -33,6 +33,11 @@ func open_file(examples = true):
 		$FileDialog.access = FileDialog.ACCESS_FILESYSTEM
 		$FileDialog.set_title("Open file")
 	$FileDialog.popup()
+
+func set_assembly_source(text: String, clear_undo = true):
+	$MainPanel/TextEdit.text = text
+	if clear_undo:
+		$MainPanel/TextEdit.clear_undo_history()
 
 func open_goto():
 	$GoToAddressDialog.visible = true
@@ -65,10 +70,10 @@ func _unhandled_key_input(event):
 	match event.scancode:
 		KEY_F1:
 			# load non-packaged file
-			open_file(false)
+			open_file_dialog(false)
 		KEY_F2:
 			# load example
-			open_file(true)
+			open_file_dialog(true)
 
 func _on_FileDialog_file_selected(path):
 	loaded_file = path

@@ -61,7 +61,7 @@ func open_rom(path):
 		return
 
 	asm.asm_str = file.get_as_text()
-	$UI/MainPanel/TextEdit.text = asm.asm_str
+	$UI.set_assembly_source(asm.asm_str)
 	file.close()
 	var success = asm.assemble()
 	$CPU.reset($CPU.M6502_RUNNING)
