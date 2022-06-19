@@ -72,9 +72,9 @@ margin_right = 111.5
 margin_bottom = 50.5
 
 [node name="MainPanel" type="Panel" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
 margin_top = 20.0
-margin_right = 688.0
-margin_bottom = 548.0
 rect_min_size = Vector2( 0, 20 )
 
 [node name="Screen" parent="MainPanel" instance=ExtResource( 2 )]
@@ -82,22 +82,23 @@ scale = Vector2( 8, 8 )
 centered = false
 
 [node name="TextEdit" type="TextEdit" parent="MainPanel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
 margin_left = 256.0
-margin_right = 688.0
-margin_bottom = 256.0
+margin_bottom = -272.0
+focus_mode = 1
 custom_fonts/font = ExtResource( 5 )
-text = "; enter assembly here"
 highlight_current_line = true
 syntax_highlighting = true
 show_line_numbers = true
 script = ExtResource( 6 )
 
 [node name="RegisterInfo" type="Label" parent="MainPanel"]
-anchor_top = 0.5
+anchor_top = 1.0
 anchor_right = 1.0
-anchor_bottom = 0.5
-margin_top = -7.0
-margin_bottom = 7.0
+anchor_bottom = 1.0
+margin_top = -271.0
+margin_bottom = -257.0
 size_flags_horizontal = 3
 text = "A: $00    X: $00    Y: $00    PC: $0000    SP: $0000"
 

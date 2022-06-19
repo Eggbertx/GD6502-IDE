@@ -49,7 +49,6 @@ config/windows_native_icon="res://assets/icon.ico"
 
 window/size/width=688
 window/size/height=548
-window/size/resizable=false
 
 [editor_plugins]
 

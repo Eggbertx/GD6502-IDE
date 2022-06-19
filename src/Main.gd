@@ -43,9 +43,8 @@ func _ready():
 
 func _input(event):
 	if event is InputEventKey:
-		match event.scancode:
-			KEY_ESCAPE:
-				get_tree().quit(0)
+		if $CPU.status == $CPU.M6502_RUNNING and $CPU.memory.size() >= 0xFF:
+			$CPU.memory[0xFF] = event.scancode & 0xFF
 
 # delta is the elapsed time since the previous frame.
 #func _process(delta):
