@@ -81,7 +81,6 @@ func _on_UI_emulator_item_selected(id) -> void:
 	match id:
 		EMULATOR_ASSEMBLE:
 			asm.asm_str = $UI/MainPanel/TextEdit.text
-			$UI/MainPanel/TextEdit.text = asm.asm_str
 			var success = asm.assemble()
 			$CPU.reset($CPU.M6502_RUNNING)
 			if success == OK:
