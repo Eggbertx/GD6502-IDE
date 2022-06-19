@@ -1,7 +1,5 @@
 extends TextEdit
 
-var use_console = false
-
 func _init() -> void:
 	var menu = get_menu()
 	menu.add_item("Clear")
@@ -15,19 +13,14 @@ func context_menu_selected(id):
 func write_line(s = ""):
 	text += str(s) + "\n"
 	cursor_set_line(get_line_count())
-	if use_console:
-		Console.write_line(s)
 
 func write(s):
 	text += str(s)
 	cursor_set_line(get_line_count())
-	if use_console:
-		Console.write(s)
 
 func write_linebreak():
 	write_line("--------------------------------")
 
 func clear():
 	text = ""
-	if use_console:
-		Console.clear()
+

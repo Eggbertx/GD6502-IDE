@@ -3,7 +3,6 @@ class_name Assembler
 const INVALID_SYNTAX = -3
 const unset_label = 0xFFFF # uses this as a memory address if a referenced label doesn't exist
 const start_pc = 0x600
-var debug = false
 var current_pc = start_pc
 
 var logger: Node
@@ -40,11 +39,10 @@ func _init():
 	high_byte_re.compile("^#>(\\w+)$")
 	low_byte_re.compile("^#<(\\w+)$")
 	assembled = PoolByteArray()
-	debug = OS.is_debug_build()
-	logger = Console
+	logger = null
 
 func debug_print(debug_str):
-	if !debug or !logger.has_method("write_line"):
+	if logger == null or !logger.has_method("write_line"):
 		return
 	logger.write_line(debug_str)
 
@@ -312,7 +310,7 @@ func assemble():
 				return Opcodes.UNDEFINED_OPCODE
 
 	update_labels()
-	if logger.has_method("write_linebreak"):
+	if logger != null and logger.has_method("write_linebreak"):
 		logger.write_linebreak()
 	print_hexdump()
 	return OK

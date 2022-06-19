@@ -27,39 +27,40 @@ var PC = PC_START
 var status = M6502_STOPPED
 var memory = []
 var memory_size = 0
-var debug = false
 var asm: Assembler
 var opcode = Opcodes.BRK
 var logger: Node
 
 func _ready():
 	reset()
-	asm = Assembler.new()
-	logger = Console
+	# asm = Assembler.new()
+	logger = null
+
+# func load_bytes(filepath:String)
 
 func load_file(filepath:String):
 	reset()
-	asm.set_logger(logger)
-	var err = asm.load_asm(filepath)
-	if err:
-		return err
-	asm.assemble()
-	return
+	# asm.set_logger(logger)
+	# var err = asm.load_asm(filepath)
+	# if err:
+	# 	return err
+	# asm.assemble()
+	# return
 	var bytes = asm.parse_asm()
-	if bytes == null or bytes.empty():
-		logger.write_line("No code to run")
-		return
-	var num_bytes = bytes.size()
-	memory.resize(PC_START + num_bytes)
-	logger.write_line("Loaded and assembled file, %d bytes" % num_bytes)
-	for b in range(num_bytes):
-		memory[PC_START + b] = bytes[b]
+	# if bytes == null or bytes.empty():
+	# 	logger.write_line("No code to run")
+	# 	return
+	# var num_bytes = bytes.size()
+	# memory.resize(PC_START + num_bytes)
+	# logger.write_line("Loaded and assembled file, %d bytes" % num_bytes)
+	# for b in range(num_bytes):
+	# 	memory[PC_START + b] = bytes[b]
 
 func set_logger(newlogger):
 	logger = newlogger
 
 func print_info():
-	if debug:
+	if logger != null:
 		logger.write_line("Accumulator: %x" % accumulator)
 		logger.write_line("X: %x" % x)
 		logger.write_line("Y: %x" % y)

@@ -1,10 +1,13 @@
 extends Node
 
 enum {
-	GAME_FILE,
-	GAME_EXAMPLE,
-	GAME_SEPARATOR,
-	GAME_QUIT,
+	FILE_OPEN_FILE,
+	FILE_OPEN_EXAMPLE,
+	FILE_SEPARATOR1,
+	FILE_SAVE_FILE,
+	FILE_SAVE_FILE_AS,
+	FILE_SEPARATOR2,
+	FILE_QUIT,
 }
 enum {
 	HELP_REPO,
@@ -14,6 +17,7 @@ enum {
 }
 
 enum {
+	EMULATOR_ASSEMBLE
 	EMULATOR_START
 	EMULATOR_PAUSED
 	EMULATOR_STEP_FORWARD
@@ -26,21 +30,13 @@ enum {
 
 const REPO_URL = "https://github.com/Eggbertx/GD6502"
 var logger: Node
+var asm: Assembler
 
 func _ready():
-	logger = $UI/TabContainer/Status
-	Console.add_command("loadAsm", self, "open_rom")\
- 		.set_description("Loads a 6502asm-compatible assembly source file")\
- 		.add_argument("file", TYPE_STRING, "The source file to be loaded")\
- 		.register()
-	Console.add_command("assembleLine", self, "assemble_line")\
-		.set_description("Assembles a line of text and prints the memory info and hexdump")\
-		.add_argument("opcode", TYPE_STRING, "A 6502 opcode")\
-		.add_argument("arg", TYPE_STRING, "A memory address or value. If none is provided, implied addressing is assumed.")\
-		.register()
-
-	$CPU.debug = OS.is_debug_build()
-	$CPU.set_logger($UI/TabContainer/Status)
+	logger = $UI/MainPanel/TabContainer/Status
+	$CPU.set_logger(logger)
+	asm = Assembler.new()
+	asm.set_logger(logger)
 	var args = OS.get_cmdline_args()
 	if args.size() > 0:
 		open_rom(args[0])
@@ -55,38 +51,42 @@ func _input(event):
 #func _process(delta):
 #	pass
 
-func assemble_line(opcode:String, args:String = ""):
-	var asm = Assembler.new()
-	asm.set_logger(logger)
-	var line = "%s %s" % [opcode, args]
-	asm.asm_str = line
-	logger.write_line(line)
-	print()
-	asm.assemble()
-
 func open_rom(path):
 	$UI.log_print("Loading file: %s" % path)
 	$UI.log_line()
 	$CPU.memory.resize($CPU.PC_START)
-	var err = $CPU.load_file(path)
-	if err:
-		$UI.log("Error loading %s" % path)
+	var file = File.new()
+	var err = file.open(path, File.READ)
+	if err != OK:
+		$UI.log("Error loading %s" % err)
 		return
-	$CPU.reset($CPU.M6502_RUNNING)
-	$CPU.execute()
 
-func _on_UI_game_item_selected(id):
+	asm.asm_str = file.get_as_text()
+	$UI/MainPanel/TextEdit.text = asm.asm_str
+	file.close()
+	var success = asm.assemble()
+	$CPU.reset($CPU.M6502_RUNNING)
+	if success == OK:
+		$CPU.execute()
+
+func _on_UI_file_item_selected(id):
 	match id:
-		GAME_FILE:
+		FILE_OPEN_FILE:
 			$UI.open_file(false)
-		GAME_EXAMPLE:
+		FILE_OPEN_EXAMPLE:
 			$UI.open_file(true)
-		GAME_QUIT:
+		FILE_QUIT:
 			get_tree().quit(0)
 
 func _on_UI_emulator_item_selected(id) -> void:
-	logger.write_line(id)
 	match id:
+		EMULATOR_ASSEMBLE:
+			asm.asm_str = $UI/MainPanel/TextEdit.text
+			$UI/MainPanel/TextEdit.text = asm.asm_str
+			var success = asm.assemble()
+			$CPU.reset($CPU.M6502_RUNNING)
+			if success == OK:
+				$CPU.execute()
 		EMULATOR_START:
 			logger.write_line("Starting emulator")
 		EMULATOR_PAUSED:
@@ -100,7 +100,7 @@ func _on_UI_emulator_item_selected(id) -> void:
 		EMULATOR_GOTO:
 			$UI/GoToAddressDialog.show()
 		EMULATOR_CLEAR_LOG:
-			$UI/TabContainer/Status.clear()
+			$UI/MainPanel/TabContainer/Status.clear()
 
 func _on_UI_help_item_selected(id):
 	match id:
