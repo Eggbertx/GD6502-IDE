@@ -1,11 +1,10 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://src/UI.gd" type="Script" id=1]
 [ext_resource path="res://src/Screen.tscn" type="PackedScene" id=2]
 [ext_resource path="res://src/GoToAddress.tscn" type="PackedScene" id=3]
 [ext_resource path="res://src/StatusLogger.tscn" type="PackedScene" id=4]
 [ext_resource path="res://assets/source-code-pro_dynamicfont.tres" type="DynamicFont" id=5]
-[ext_resource path="res://src/AsmEditor.gd" type="Script" id=6]
 
 [node name="UI" type="Control"]
 anchor_right = 1.0
@@ -91,7 +90,6 @@ custom_fonts/font = ExtResource( 5 )
 highlight_current_line = true
 syntax_highlighting = true
 show_line_numbers = true
-script = ExtResource( 6 )
 
 [node name="RegisterInfo" type="Label" parent="MainPanel"]
 anchor_top = 1.0

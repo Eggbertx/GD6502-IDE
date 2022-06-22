@@ -17,7 +17,14 @@ func _ready():
 	file_menu.connect("id_pressed", self, "file_menu_selected")
 	emulator_menu.connect("id_pressed", self, "emulator_menu_selected")
 	help_menu.connect("id_pressed", self, "help_menu_selected")
+	init_syntax_highlighting()
 
+func init_syntax_highlighting():
+	$MainPanel/TextEdit.grab_focus()
+	$MainPanel/TextEdit.add_color_region(";", "", Color.darkgray)
+	for opcode in Opcodes.dict:
+		$MainPanel/TextEdit.add_keyword_color(opcode, Color.green)
+		$MainPanel/TextEdit.add_keyword_color(opcode.to_lower(), Color.green)
 
 func pixel_size():
 	return get_viewport().size.x / screen_size
