@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=2]
 
 [ext_resource path="res://src/StatusLogger.gd" type="Script" id=1]
-[ext_resource path="res://assets/source-code-pro_dynamicfont.tres" type="DynamicFont" id=2]
+[ext_resource path="res://assets/NotoSansMonoRegular.tres" type="DynamicFont" id=2]
 
 [node name="StatusLogger" type="TextEdit"]
 margin_right = 40.0
