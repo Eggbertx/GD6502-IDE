@@ -29,10 +29,12 @@ enum {
 }
 
 const REPO_URL = "https://github.com/Eggbertx/GD6502"
+const SETTINGS_PATH = "user://settings.save"
 var logger: Node
 var asm: Assembler
 
 func _ready():
+	load_settings()
 	logger = $UI/MainPanel/TabContainer/Status
 	$CPU.set_logger(logger)
 	asm = Assembler.new()
@@ -46,9 +48,31 @@ func _input(event):
 		if $CPU.status == $CPU.M6502_RUNNING and $CPU.memory.size() >= 0xFF:
 			$CPU.memory[0xFF] = event.scancode & 0xFF
 
-# delta is the elapsed time since the previous frame.
-#func _process(delta):
-#	pass
+func _notification(what: int) -> void:
+	if what == MainLoop.NOTIFICATION_WM_QUIT_REQUEST:
+		save_settings()
+
+func save_settings():
+	var file = File.new()
+	if file.open(SETTINGS_PATH, File.WRITE) != OK:
+		OS.alert("Failed saving settings")
+		return
+	file.store_var(OS.window_maximized)
+	file.store_var(OS.window_size)
+	file.close()
+
+
+func load_settings():
+	var file = File.new()
+	if !file.file_exists(SETTINGS_PATH):
+		return
+	if file.open(SETTINGS_PATH, File.READ) != OK:
+		$UI.log_print("Failed loading settings")
+		return
+
+	OS.window_maximized = file.get_var()
+	OS.window_size = file.get_var()
+	file.close()
 
 func open_rom(path):
 	$UI.log_print("Loading file: %s" % path)
@@ -57,7 +81,7 @@ func open_rom(path):
 	var file = File.new()
 	var err = file.open(path, File.READ)
 	if err != OK:
-		$UI.log("Error loading %s" % err)
+		$UI.log("Got error code %d while loading %s" % [err, path])
 		return
 
 	asm.asm_str = file.get_as_text()
