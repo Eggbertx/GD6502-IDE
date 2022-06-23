@@ -1,0 +1,27 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run game",
+            "type": "f5anything",
+            "request": "launch",
+            "command": "godot --path ${workspaceFolder}"
+        },
+        {
+            "name": "Debug game",
+            "type": "godot",
+            "request": "launch",
+            "project": "${workspaceFolder}",
+            "port": 6007,
+            "address": "127.0.0.1",
+            "launch_game_instance": true,
+            "launch_scene": false
+        },
+        {
+            "name": "Launch GUT (Godot Unit Testing)",
+            "type": "f5anything",
+            "request": "launch",
+            "command": "godot --debug-collisions --path ${workspaceFolder} -d -s addons/gut/gut_cmdln.gd"
+        }
+    ]
+}
