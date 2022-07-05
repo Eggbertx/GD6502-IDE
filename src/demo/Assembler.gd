@@ -175,7 +175,6 @@ func assemble_line(line: String):
 
 	if parts[0] == "dcb":
 		# line has a dcb, example "dcb $01, $02, $15"
-		print(parts[0])
 		return append_bytes(dcb_to_bytes(operands), INVALID_SYNTAX)
 
 	matched = high_byte_re.search(operands)
@@ -202,9 +201,21 @@ func assemble_line(line: String):
 		return append_bytes(get_instruction_bytes(opcode, Opcodes.IMMEDIATE_ADDR, value))
 
 	var is_memory_addr = strings[3] == "$" or (strings[3] == "" and strings[4].is_valid_integer())
-	
 	var is_label = (not strings[4].is_valid_integer()) and strings[3] != "$"
-	var num = ("0x" + strings[4]).hex_to_int() if strings[3] == "$" else strings[4].to_int()
+	var num: int
+	if is_label:
+		num = unset_label
+	elif strings[3] == "$":
+		num = ("0x" + strings[4]).hex_to_int()
+	else:
+		num = strings[4].to_int()
+
+	if is_memory_addr and strings[4].length() > 4:
+		# fail if number is a memory address > 16 bits
+		print_debug("invalid number %s" % strings[4])
+		return INVALID_SYNTAX
+	
+
 
 	var mode = Opcodes.INVALID_ADDRESS_MODE
 	if strings[1] == "(" and strings[5] == ")":
@@ -247,13 +258,13 @@ func assemble_line(line: String):
 		mode = Opcodes.ZERO_PAGE_ADDR
 	
 	if mode < 0:
-		print("invalid:", cleaned)
+		print_debug("Error code %d on line : %s" % [mode, cleaned])
 		return mode
 
 
 	var status = append_bytes(get_instruction_bytes(opcode, mode, num), Opcodes.INVALID_ADDRESS_MODE)
 	if status < 0:
-		print("invalid:", cleaned)
+		print_debug("Invalid addressing mode on line: %s" % line)
 		return status
 
 	if is_label:
@@ -292,6 +303,7 @@ func assemble():
 	label_refs.clear()
 
 	if asm_str == "":
+		debug_print("No code to assemble")
 		return OK
 	var lines = asm_str.split("\n")
 	current_pc = start_pc
