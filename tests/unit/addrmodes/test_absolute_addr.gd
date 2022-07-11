@@ -1,0 +1,99 @@
+extends "res://addons/gut/test.gd"
+
+# Test absolute and absolute-indexed addressing
+
+var asm = Assembler.new()
+
+const abs_str = """
+ADC $abcd
+AND $abcd
+ASL $abcd
+BIT $abcd
+CMP $abcd
+CPX $abcd
+CPY $abcd
+DEC $abcd
+EOR $abcd
+INC $abcd
+JMP $abcd
+JSR $abcd
+LDA $abcd
+LDX $abcd
+LDY $abcd
+LSR $abcd
+ORA $abcd
+ROR $abcd
+ROL $abcd
+SBC $abcd
+STA $abcd
+STX $abcd
+STY $abcd
+"""
+var abs_assembled = PoolByteArray([
+	0x6d, 0xcd, 0xab, 0x2d, 0xcd, 0xab, 0x0e, 0xcd, 0xab, 0x2c, 0xcd, 0xab, 0xcd, 0xcd, 0xab, 0xec,
+	0xcd, 0xab, 0xcc, 0xcd, 0xab, 0xce, 0xcd, 0xab, 0x4d, 0xcd, 0xab, 0xee, 0xcd, 0xab, 0x4c, 0xcd,
+	0xab, 0x20, 0xcd, 0xab, 0xad, 0xcd, 0xab, 0xae, 0xcd, 0xab, 0xac, 0xcd, 0xab, 0x4e, 0xcd, 0xab,
+	0x0d, 0xcd, 0xab, 0x6e, 0xcd, 0xab, 0x2e, 0xcd, 0xab, 0xed, 0xcd, 0xab, 0x8d, 0xcd, 0xab, 0x8e,
+	0xcd, 0xab, 0x8c, 0xcd, 0xab
+])
+
+const absx_str = """
+ADC $abcd,x
+AND $abcd,x
+ASL $abcd,x
+CMP $abcd,x
+DEC $abcd,x
+EOR $abcd,x
+INC $abcd,x
+LDA $abcd,x
+LDY $abcd,x
+LSR $abcd,x
+ORA $abcd,x
+ROR $abcd,x
+ROL $abcd,x
+SBC $abcd,x
+STA $abcd,x
+"""
+var absx_assembled = PoolByteArray([
+	0x7d, 0xcd, 0xab, 0x3d, 0xcd, 0xab, 0x1e, 0xcd, 0xab, 0xdd, 0xcd, 0xab, 0xde, 0xcd, 0xab, 0x5d,
+	0xcd, 0xab, 0xfe, 0xcd, 0xab, 0xbd, 0xcd, 0xab, 0xbc, 0xcd, 0xab, 0x5e, 0xcd, 0xab, 0x1d, 0xcd,
+	0xab, 0x7e, 0xcd, 0xab, 0x3e, 0xcd, 0xab, 0xfd, 0xcd, 0xab, 0x9d, 0xcd, 0xab
+])
+
+const absy_str = """
+ADC $abcd,y
+AND $abcd,y
+CMP $abcd,y
+EOR $abcd,y
+LDA $abcd,y
+LDX $abcd,y
+ORA $abcd,y
+SBC $abcd,y
+STA $abcd,y
+"""
+var absy_assembled = PoolByteArray([
+	0x79, 0xcd, 0xab, 0x39, 0xcd, 0xab, 0xd9, 0xcd, 0xab, 0x59, 0xcd, 0xab, 0xb9, 0xcd, 0xab, 0xbe,
+	0xcd, 0xab, 0x19, 0xcd, 0xab, 0xf9, 0xcd, 0xab, 0x99, 0xcd, 0xab
+])
+
+func test_absolute_addressing():
+	asm.asm_str = abs_str
+	var success = asm.assemble()
+	assert_eq(success, OK, "tests to make sure the code for testing absolute addressing assembled with no errors")
+	assert_eq(asm.assembled.size(), abs_assembled.size(), "assembled bytecode size")
+	assert_eq(asm.assembled, abs_assembled, "testing absolute addressing")
+
+func test_absolutex_addressing():
+	asm.asm_str = absx_str
+	var success = asm.assemble()
+	assert_eq(success, OK, "tests to make sure the code for testing absolute,x addressing assembled with no errors")
+	assert_eq(asm.assembled.size(), absx_assembled.size(), "assembled bytecode size")
+	assert_eq(asm.assembled, absx_assembled, "testing absolute,x addressing")
+
+func test_absolutey_addressing():
+	asm.asm_str = absy_str
+	var success = asm.assemble()
+	assert_eq(success, OK, "tests to make sure the code for testing absolute,y addressing assembled with no errors")
+	assert_eq(asm.assembled.size(), absy_assembled.size(), "assembled bytecode size")
+	assert_eq(asm.assembled, absy_assembled, "testing absolute,y addressing")
+	
