@@ -27,7 +27,7 @@ var PC = PC_START
 var status = M6502_STOPPED
 var memory = []
 var memory_size = 0
-var opcode = Opcodes.BRK
+var opcode = 0
 var logger: Node
 
 func _ready():
@@ -87,6 +87,6 @@ func execute(new_PC = -1):
 	#print_info()
 	# opcode = pop_byte()
 	#match opcode:
-	#	Opcodes.BRK:
+	#	0:
 	#		status = M6502_STOPPED
 
