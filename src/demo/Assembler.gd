@@ -210,12 +210,10 @@ func assemble_line(line: String):
 	else:
 		num = strings[4].to_int()
 
-	if is_memory_addr and strings[4].length() > 4:
+	if num > 0xFFFF:
 		# fail if number is a memory address > 16 bits
 		print_debug("invalid number %s" % strings[4])
 		return INVALID_SYNTAX
-	
-
 
 	var mode = Opcodes.INVALID_ADDRESS_MODE
 	if strings[1] == "(" and strings[5] == ")":
@@ -225,32 +223,33 @@ func assemble_line(line: String):
 			else:
 				# indirect indexed, ex: ($00),y
 				mode = Opcodes.INDIRECT_Y_ADDR
-		if strings[4].length() <= 2 and (not is_label):
+		if num > 0xFF and (not is_label):
 			mode = INVALID_SYNTAX
 		else:
 			# indirect, ex ($ff00)
 			mode = Opcodes.INDIRECT_ADDR
 	elif strings[1] == "(" and strings[6].to_lower() == ",x" and strings[7] == ")":
-		if strings[4].length() > 2 or is_label:
+		if num > 0xFF or is_label:
 			mode = INVALID_SYNTAX
 		else:
 			# indexed indirect, ex: ($00,x)
 			mode = Opcodes.INDIRECT_X_ADDR
 	elif strings[6].to_lower() == ",x":
-		if strings[4].length() > 2 or is_label:
+		if num > 0xFF or is_label:
 			# ex: $1234,x
 			mode = Opcodes.ABSOLUTE_X_ADDR
 		else:
 			# ex: $ab,x
+			print_debug("%s has a zero page x" % line)
 			mode = Opcodes.ZERO_PAGE_X_ADDR
 	elif strings[6].to_lower() == ",y":
-		if strings[4].length() > 2 or is_label:
+		if num > 0xFF or is_label:
 			# ex: $1234,y
 			mode = Opcodes.ABSOLUTE_Y_ADDR
 		else:
 			# ex: $ab,y
 			mode = Opcodes.ZERO_PAGE_Y_ADDR
-	if strings[4].length() > 2 or is_label:
+	elif num > 0xFF or is_label:
 		# ex: $ff00
 		mode = Opcodes.ABSOLUTE_ADDR
 	else:
@@ -260,7 +259,6 @@ func assemble_line(line: String):
 	if mode < 0:
 		print_debug("Error code %d on line : %s" % [mode, cleaned])
 		return mode
-
 
 	var status = append_bytes(get_instruction_bytes(opcode, mode, num), Opcodes.INVALID_ADDRESS_MODE)
 	if status < 0:
