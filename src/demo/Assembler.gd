@@ -200,7 +200,6 @@ func assemble_line(line: String):
 			value = strings[4].to_int()
 		return append_bytes(get_instruction_bytes(opcode, Opcodes.IMMEDIATE_ADDR, value))
 
-	var is_memory_addr = strings[3] == "$" or (strings[3] == "" and strings[4].is_valid_integer())
 	var is_label = (not strings[4].is_valid_integer()) and strings[3] != "$"
 	var num: int
 	if is_label:
@@ -218,12 +217,12 @@ func assemble_line(line: String):
 	var mode = Opcodes.INVALID_ADDRESS_MODE
 	if strings[1] == "(" and strings[5] == ")":
 		if strings[6].to_lower() == ",y":
-			if (strings[3] == "$" and strings[4].length() > 2) or (strings[3] != "$") or is_label:
+			if (strings[3] == "$" and num > 0xFF) or is_label:
 				mode = INVALID_SYNTAX
 			else:
 				# indirect indexed, ex: ($00),y
 				mode = Opcodes.INDIRECT_Y_ADDR
-		if num > 0xFF and (not is_label):
+		elif num <= 0xFF and (not is_label):
 			mode = INVALID_SYNTAX
 		else:
 			# indirect, ex ($ff00)
@@ -257,7 +256,7 @@ func assemble_line(line: String):
 		mode = Opcodes.ZERO_PAGE_ADDR
 	
 	if mode < 0:
-		print_debug("Error code %d on line : %s" % [mode, cleaned])
+		print_debug("Error code %d on line: %s" % [mode, cleaned])
 		return mode
 
 	var status = append_bytes(get_instruction_bytes(opcode, mode, num), Opcodes.INVALID_ADDRESS_MODE)
