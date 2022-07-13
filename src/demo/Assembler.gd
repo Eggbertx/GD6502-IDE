@@ -35,7 +35,7 @@ func _init():
 	operand_re.compile("(\\()?(#)?(\\$)?(\\w+)(\\))?(,[xXyY])?(\\))?$")
 	whitespace_re.compile("\\s+")
 	labeldef_re.compile("^(\\w+):(.*)")
-	program_offset_re.compile("^\\*=(\\$?\\w+)")
+	program_offset_re.compile("^\\*=(\\$?\\w+)$")
 	high_byte_re.compile("^#>(\\w+)$")
 	low_byte_re.compile("^#<(\\w+)$")
 	assembled = PoolByteArray()
@@ -49,9 +49,10 @@ func debug_print(debug_str):
 func get_label_addr(labelname:String):
 	return labels.get(labelname, unset_label)
 
-# get the given number as a little-endian byte array, capping it at 16 bits
-func get_bytes(num:int):
-	if num < 256:
+# Get the given number as a little-endian byte array, capping it at 16 bits.
+# If is_word is true, it forces the result to be a 16-bit address (returning two bytes) even if num < 0xFF
+func get_bytes(num:int, is_word = false):
+	if num < 256 and not is_word:
 		return [num]
 	return [num & 0x00FF, (num & 0xFF00) >> 8]
 
@@ -147,10 +148,17 @@ func assemble_line(line: String):
 	var matched = program_offset_re.search(cleaned)
 	if matched != null:
 		# line has a program offset, example "*=128"
-		if matched.strings[1][0] == "$":
-			current_pc = ("0x" + matched.strings[1].substr(1)).hex_to_int()
-		else:
-			current_pc = matched.strings[1].to_int()
+		var addr = -1
+		if matched.strings[1][0] == "$" and matched.strings[1].substr(1).is_valid_hex_number(false):
+			# hexadecimal address, ex: *=$0600
+			addr = ("0x" + matched.strings[1].substr(1)).hex_to_int() 
+		elif matched.strings[1].is_valid_integer():
+			# decimal address, ex: *=1536
+			addr = matched.strings[1].to_int()
+		if addr < 0 or addr > 0xFFFF:
+			# address is an invalid number or is out of bounds
+			return INVALID_SYNTAX
+		current_pc = addr
 		return OK
 
 	matched = labeldef_re.search(cleaned)
@@ -277,7 +285,7 @@ func update_labels():
 		if not labels.has(labelname):
 			continue
 		var location = label["location"]
-		var bytes = get_bytes(labels[labelname])
+		var bytes = get_bytes(labels[labelname], true)
 		assembled[location] = bytes[0]
 		assembled[location + 1] = bytes[1]
 
