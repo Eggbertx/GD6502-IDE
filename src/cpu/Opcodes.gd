@@ -27,9 +27,15 @@ static func get_opcode_byte(opcode:String, mode:int):
 		return INVALID_ADDRESS_MODE
 	return dict[opcode][mode]
 
+# Returns true if the specified opcode string refers to an instruction that uses relative addressing,
+# otherwise 16-bit addresses passed to it are stored as the 8-bit difference between that address and
+# the current PC
+static func is_relative_instruction(opcode: String):
+	return dict.has(opcode.to_upper()) and dict[opcode.to_upper()][RELATIVE_ADDR] > -1
+
 # dictionary used for basic assembly
 const dict = {
-#  Opcode   IMP    ACC   ABS   ZP    IMM   ABSX  ABSY  INDX  INDY  ZPX   ZPY   REL   IND
+#  Opcode   IMP    ACC  ABS   ZP    IMM   ABSX  ABSY  INDX  INDY  ZPX   ZPY   REL  IND
 	"ADC": [-1,    -1,  0x6D, 0x65, 0x69, 0x7D, 0x79, 0x61, 0x71, 0x75, -1,   -1,   -1],
 	"AND": [-1,    -1,  0x2D, 0x25, 0x29, 0x3D, 0x39, 0x21, 0x31, 0x35, -1,   -1,   -1],
 	"ASL": [-1,   0x0A, 0x0E, 0x06, -1,   0x1E, -1,   -1,   -1,   0x16, -1,   -1,   -1],
@@ -57,7 +63,7 @@ const dict = {
 	"INC": [-1,    -1,  0xEE, 0xE6, -1,   0xFE, -1,   -1,   -1,   0xF6, -1,   -1,   -1],
 	"INX": [0xE8,  -1,  -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1],
 	"INY": [0xC8,  -1,  -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1],
-	"JMP": [-1,    -1,  0x4C, -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   0x6C],
+	"JMP": [-1,    -1,  0x4C, -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,  0x6C],
 	"JSR": [-1,    -1,  0x20, -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1],
 	"LDA": [-1,    -1,  0xAD, 0xA5, 0xA9, 0xBD, 0xB9, 0xA1, 0xB1, 0xB5, -1,   -1,   -1],
 	"LDX": [-1,    -1,  0xAE, 0xA6, 0xA2, -1,   0xBE, -1,   -1,   -1,   0xB6, -1,   -1],

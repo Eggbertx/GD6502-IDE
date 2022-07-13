@@ -1,6 +1,8 @@
 class_name Assembler
 
 const INVALID_SYNTAX = -3
+const UNDEFINED_LABEL = -4
+const INVALID_BRANCH = -5
 const unset_label = 0xFFFF # uses this as a memory address if a referenced label doesn't exist
 const start_pc = 0x600
 var current_pc = start_pc
@@ -31,6 +33,12 @@ var label_refs = [
 	# {"name": "labelname", "location": 0}
 ]
 
+# used for referencing labels in branch calls, with "location" referring to the position in the byte array
+# to be replaced with the distance between the label's address and "pc"
+var relative_calls = [
+	# {"location": 0x01, "label": "start", "pc": current_pc}
+]
+
 func _init():
 	operand_re.compile("(\\()?(#)?(\\$)?(\\w+)(\\))?(,[xXyY])?(\\))?$")
 	whitespace_re.compile("\\s+")
@@ -46,8 +54,8 @@ func debug_print(debug_str):
 		return
 	logger.write_line(debug_str)
 
-func get_label_addr(labelname:String):
-	return labels.get(labelname, unset_label)
+func get_label_addr(labelname:String, if_unset = unset_label):
+	return labels.get(labelname, if_unset)
 
 # Get the given number as a little-endian byte array, capping it at 16 bits.
 # If is_word is true, it forces the result to be a 16-bit address (returning two bytes) even if num < 0xFF
@@ -61,9 +69,7 @@ func get_instruction_bytes(opcode:String, addr_mode:int, arg:int = -1):
 	var op_byte = Opcodes.get_opcode_byte(opcode, addr_mode)
 	if op_byte < 0:
 		# 6502asm.com's assembler uses some nonstandard addressing
-		if addr_mode == Opcodes.ABSOLUTE_ADDR:
-			addr_mode = Opcodes.RELATIVE_ADDR
-		elif addr_mode == Opcodes.IMPLIED_ADDR:
+		if addr_mode == Opcodes.IMPLIED_ADDR:
 			addr_mode = Opcodes.ACCUMULATOR_ADDR
 		op_byte = Opcodes.get_opcode_byte(opcode, addr_mode)
 
@@ -134,9 +140,7 @@ func append_bytes(bytes: Array, on_invalid = INVALID_SYNTAX):
 		return OK
 	return on_invalid
 
-# Cleans and compiles `line` into 6502 bytecode. If `log_info` is set, info about each line
-# (addressing mode, data scraped from regular expressions, etc) to the status log and can
-# cause serious slowdown fo large assembly files so it is disabled by default
+# Cleans and compiles `line` into 6502 bytecode
 func assemble_line(line: String):
 	if assembled == null:
 		assembled = PoolByteArray()
@@ -219,7 +223,6 @@ func assemble_line(line: String):
 
 	if num > 0xFFFF:
 		# fail if number is a memory address > 16 bits
-		print_debug("invalid number %s" % strings[4])
 		return INVALID_SYNTAX
 
 	var mode = Opcodes.INVALID_ADDRESS_MODE
@@ -247,7 +250,6 @@ func assemble_line(line: String):
 			mode = Opcodes.ABSOLUTE_X_ADDR
 		else:
 			# ex: $ab,x
-			print_debug("%s has a zero page x" % line)
 			mode = Opcodes.ZERO_PAGE_X_ADDR
 	elif strings[6].to_lower() == ",y":
 		if num > 0xFF or is_label:
@@ -258,7 +260,11 @@ func assemble_line(line: String):
 			mode = Opcodes.ZERO_PAGE_Y_ADDR
 	elif num > 0xFF or is_label:
 		# ex: $ff00
-		mode = Opcodes.ABSOLUTE_ADDR
+		if Opcodes.is_relative_instruction(opcode):
+			mode = Opcodes.RELATIVE_ADDR
+			num = 0xFF
+		else:
+			mode = Opcodes.ABSOLUTE_ADDR
 	else:
 		# ex: $ab
 		mode = Opcodes.ZERO_PAGE_ADDR
@@ -273,9 +279,17 @@ func assemble_line(line: String):
 		return status
 
 	if is_label:
-		label_refs.append(
-			{"name": strings[4], "location": assembled.size() - 2}
-		)
+		if mode == Opcodes.RELATIVE_ADDR:
+			relative_calls.append({
+				"location": assembled.size() - 1,
+				"label": strings[4],
+				"pc": current_pc - 2
+			})
+		else:
+			# save label as an absolute address
+			label_refs.append(
+				{"name": strings[4], "location": assembled.size() - 2}
+			)
 	return OK
 
 func update_labels():
@@ -288,6 +302,18 @@ func update_labels():
 		var bytes = get_bytes(labels[labelname], true)
 		assembled[location] = bytes[0]
 		assembled[location + 1] = bytes[1]
+	
+	for ref in relative_calls:
+		var label_addr = get_label_addr(ref["label"], -1)
+		if label_addr < 0:
+			debug_print("Undefined label: %s" % ref["label"])
+			return UNDEFINED_LABEL
+		var distance = label_addr - ref["pc"] - 2
+		if distance < -128 or distance > 127:
+			debug_print("Out of range branch: %s" % ref["label"])
+			return INVALID_BRANCH
+		assembled[ref["location"]] = distance & 0xFF
+	return OK
 
 func print_hexdump():
 	debug_print("Hexdump:")
@@ -306,6 +332,7 @@ func assemble():
 	assembled.resize(0)
 	labels.clear()
 	label_refs.clear()
+	relative_calls.clear()
 
 	if asm_str == "":
 		debug_print("No code to assemble")
@@ -326,7 +353,9 @@ func assemble():
 				debug_print("Unrecognized opcode on line #%d: %s" % [l+1, line_str])
 				return Opcodes.UNDEFINED_OPCODE
 
-	update_labels()
+	var success = update_labels()
+	if success != OK:
+		return success
 	if logger != null and logger.has_method("write_linebreak"):
 		logger.write_linebreak()
 	print_hexdump()
