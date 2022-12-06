@@ -8,6 +8,7 @@ const start_pc = 0x600
 var current_pc = start_pc
 
 var logger: Node
+var hexdump_logger: TextEdit
 
 var assembled: PoolByteArray
 var operand_re = RegEx.new()
@@ -92,6 +93,9 @@ func load_asm(asm_path:String):
 func set_logger(new_logger):
 	if new_logger.has_method("write_line"):
 		self.logger = new_logger
+
+func set_hexdump_logger(new_hexdump_logger: TextEdit):
+	self.hexdump_logger = new_hexdump_logger
 
 # remove comments and clean excess whitespace from the given line
 func clean_line(line:String):
@@ -315,8 +319,7 @@ func update_labels():
 		assembled[ref["location"]] = distance & 0xFF
 	return OK
 
-func print_hexdump():
-	debug_print("Hexdump:")
+func update_hexdump():
 	var dump_pc = start_pc
 	var dump = ""
 	for a in range(assembled.size()):
@@ -326,7 +329,7 @@ func print_hexdump():
 			dump += "%04x: " % dump_pc
 		dump += "%02x " % assembled[a]
 		dump_pc += 1
-	debug_print(dump)
+	hexdump_logger.text = dump
 
 func assemble():
 	assembled.resize(0)
@@ -358,5 +361,5 @@ func assemble():
 		return success
 	if logger != null and logger.has_method("write_linebreak"):
 		logger.write_linebreak()
-	print_hexdump()
+	update_hexdump()
 	return OK

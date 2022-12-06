@@ -39,6 +39,7 @@ func _ready():
 	$CPU.set_logger(logger)
 	asm = Assembler.new()
 	asm.set_logger(logger)
+	asm.set_hexdump_logger($UI/MainPanel/TabContainer/Hexdump)
 	var args = OS.get_cmdline_args()
 	if args.size() > 0:
 		open_rom(args[0])
