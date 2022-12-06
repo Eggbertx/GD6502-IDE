@@ -9,7 +9,6 @@ const palette = [
 
 # 32x32, or 1024
 const num_pixels = 0x400
-var p = 0
 var pixel: Rect2
 var pixel_pos: Vector2
 var pixels = []
@@ -24,13 +23,14 @@ func _ready():
 func _draw():
 	var v = Vector2(0, 0)
 	for _p in range(num_pixels):
-		v.x = (p % 32)
-		v.y = (p / 32)
+		v.x = (_p % 32)
+		v.y = (_p / 32)
 		pixel.position = v
-		draw_rect(pixel, pixels[p])
+		draw_rect(pixel, pixels[_p])
 
 func set_pixel_col(index:int, color:int):
-	pixels[index] = palette[color]
+	if pixels.count() > index:
+		pixels[index] = palette[color]
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
