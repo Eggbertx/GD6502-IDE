@@ -89,9 +89,12 @@ func open_rom(path):
 	$UI.set_assembly_source(asm.asm_str)
 	file.close()
 	var success = asm.assemble()
+	asm.update_hexdump()
 	$CPU.reset($CPU.M6502_RUNNING)
 	if success == OK:
 		$CPU.execute()
+	else:
+		$UI/MainPanel/TabContainer.current_tab = 0
 
 func _on_UI_file_item_selected(id):
 	match id:
@@ -107,9 +110,12 @@ func _on_UI_emulator_item_selected(id) -> void:
 		EMULATOR_ASSEMBLE:
 			asm.asm_str = $UI/MainPanel/TextEdit.text
 			var success = asm.assemble()
+			asm.update_hexdump()
 			$CPU.reset($CPU.M6502_RUNNING)
 			if success == OK:
 				$CPU.execute()
+			else:
+				$UI/MainPanel/TabContainer.current_tab = 0
 		EMULATOR_START:
 			logger.write_line("Starting emulator")
 		EMULATOR_PAUSED:

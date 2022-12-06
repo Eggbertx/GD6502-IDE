@@ -189,7 +189,7 @@ func assemble_line(line: String):
 		# line uses implied addressing (nop, clc, etc)
 		return append_bytes(get_instruction_bytes(parts[0], Opcodes.IMPLIED_ADDR), Opcodes.UNDEFINED_OPCODE)
 
-	if parts[0] == "dcb":
+	if parts[0].to_lower() == "dcb":
 		# line has a dcb, example "dcb $01, $02, $15"
 		return append_bytes(dcb_to_bytes(operands), INVALID_SYNTAX)
 
@@ -361,5 +361,4 @@ func assemble():
 		return success
 	if logger != null and logger.has_method("write_linebreak"):
 		logger.write_linebreak()
-	update_hexdump()
 	return OK
