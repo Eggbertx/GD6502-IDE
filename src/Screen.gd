@@ -29,7 +29,7 @@ func _draw():
 		draw_rect(pixel, pixels[_p])
 
 func set_pixel_col(index:int, color:int):
-	if pixels.count() > index:
+	if pixels.size() > index:
 		pixels[index] = palette[color]
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.

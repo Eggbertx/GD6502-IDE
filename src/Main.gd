@@ -32,6 +32,7 @@ const REPO_URL = "https://github.com/Eggbertx/GD6502"
 const SETTINGS_PATH = "user://settings.save"
 var logger: Node
 var asm: Assembler
+onready var emulator_menu = $UI/MenuPanel/HBoxContainer/EmulatorButton.get_popup()
 
 func _ready():
 	load_settings()
@@ -46,7 +47,7 @@ func _ready():
 
 func _input(event):
 	if event is InputEventKey:
-		if $CPU.status == $CPU.M6502_RUNNING and $CPU.memory.size() >= 0xFF:
+		if $CPU.get_status() == $CPU.M6502_RUNNING and $CPU.memory.size() >= 0xFF:
 			$CPU.memory[0xFF] = event.scancode & 0xFF
 
 func _notification(what: int) -> void:
@@ -62,7 +63,6 @@ func save_settings():
 	file.store_var(OS.window_size)
 	file.close()
 
-
 func load_settings():
 	var file = File.new()
 	if !file.file_exists(SETTINGS_PATH):
@@ -74,6 +74,15 @@ func load_settings():
 	OS.window_maximized = file.get_var()
 	OS.window_size = file.get_var()
 	file.close()
+
+func assemble_code():
+	var success = asm.assemble()
+	asm.update_hexdump()
+	$CPU.reset($CPU.M6502_STOPPED)
+	emulator_menu.set_item_disabled(1, asm.asm_str == "" or success != OK)
+	if success != OK:
+		$UI/MainPanel/TabContainer.current_tab = 0
+	return success
 
 func open_rom(path):
 	$UI.log_print("Loading file: %s" % path)
@@ -88,13 +97,10 @@ func open_rom(path):
 	asm.asm_str = file.get_as_text()
 	$UI.set_assembly_source(asm.asm_str)
 	file.close()
-	var success = asm.assemble()
-	asm.update_hexdump()
-	$CPU.reset($CPU.M6502_RUNNING)
+	var success = assemble_code()
 	if success == OK:
+		$CPU.reset($CPU.M6502_RUNNING)
 		$CPU.execute()
-	else:
-		$UI/MainPanel/TabContainer.current_tab = 0
 
 func _on_UI_file_item_selected(id):
 	match id:
@@ -109,23 +115,21 @@ func _on_UI_emulator_item_selected(id) -> void:
 	match id:
 		EMULATOR_ASSEMBLE:
 			asm.asm_str = $UI/MainPanel/TextEdit.text
-			var success = asm.assemble()
-			asm.update_hexdump()
-			$CPU.reset($CPU.M6502_RUNNING)
-			if success == OK:
-				$CPU.execute()
-			else:
-				$UI/MainPanel/TabContainer.current_tab = 0
+			assemble_code()
 		EMULATOR_START:
-			logger.write_line("Starting emulator")
+			$CPU.set_status(CPU.M6502_RUNNING)
 		EMULATOR_PAUSED:
-			logger.write_line("Toggling pause")
+			var status = $CPU.get_status()
+			if status == CPU.M6502_RUNNING:
+				$CPU.set_status(CPU.M6502_PAUSED)
+			elif status == CPU.M6502_PAUSED:
+				$CPU.set_status(CPU.M6502_RUNNING)
 		EMULATOR_STEP_FORWARD:
 			logger.write_line("Stepping forward")
 		EMULATOR_STEP_BACK:
 			logger.write_line("Stepping back")
 		EMULATOR_STOP:
-			logger.write_line("Stopping emulator")
+			$CPU.set_status(CPU.M6502_STOPPED)
 		EMULATOR_GOTO:
 			$UI/GoToAddressDialog.show()
 		EMULATOR_CLEAR_LOG:
@@ -144,3 +148,17 @@ func _on_UI_help_item_selected(id):
 
 func _on_UI_file_selected(file):
 	open_rom(file)
+
+
+func _on_CPU_status_changed(new_status: int, old_status: int) -> void:
+	match new_status:
+		CPU.M6502_STOPPED:
+			logger.write_line("Stopping emulator")
+		CPU.M6502_RUNNING:
+			if old_status == CPU.M6502_PAUSED:
+				logger.write_line("Unpausing emulator")
+			else:
+				logger.write_line("Starting emulator")
+		CPU.M6502_PAUSED:
+			if old_status == CPU.M6502_RUNNING:
+				logger.write_line("Pausing emulator")
