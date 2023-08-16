@@ -25,7 +25,7 @@ window/size/viewport_height=548
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/gut/plugin.cfg")
+enabled=PackedStringArray()
 
 [physics]
 
