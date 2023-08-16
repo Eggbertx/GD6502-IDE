@@ -5,6 +5,6 @@
 [sub_resource type="ImageTexture" id=1]
 size = Vector2( 32, 32 )
 
-[node name="Screen" type="Sprite"]
+[node name="Screen" type="Sprite2D"]
 texture = SubResource( 1 )
 script = ExtResource( 1 )

@@ -1,4 +1,4 @@
-extends Sprite
+extends Sprite2D
 
 const palette = [
 	Color("#000000"), Color("#ffffff"), Color("#880000"), Color("#aaffee"),

@@ -8,23 +8,23 @@ signal help_item_selected
 const pixel_scale = 8
 const screen_size = 32
 
-onready var file_menu = $MenuPanel/HBoxContainer/FileButton.get_popup()
-onready var emulator_menu = $MenuPanel/HBoxContainer/EmulatorButton.get_popup()
-onready var help_menu = $MenuPanel/HBoxContainer/HelpButton.get_popup()
+@onready var file_menu = $MenuPanel/HBoxContainer/FileButton.get_popup()
+@onready var emulator_menu = $MenuPanel/HBoxContainer/EmulatorButton.get_popup()
+@onready var help_menu = $MenuPanel/HBoxContainer/HelpButton.get_popup()
 var loaded_file = ""
 
 func _ready():
-	file_menu.connect("id_pressed", self, "file_menu_selected")
-	emulator_menu.connect("id_pressed", self, "emulator_menu_selected")
-	help_menu.connect("id_pressed", self, "help_menu_selected")
+	file_menu.connect("id_pressed", Callable(self, "file_menu_selected"))
+	emulator_menu.connect("id_pressed", Callable(self, "emulator_menu_selected"))
+	help_menu.connect("id_pressed", Callable(self, "help_menu_selected"))
 	init_syntax_highlighting()
 
 func init_syntax_highlighting():
 	$MainPanel/TextEdit.grab_focus()
-	$MainPanel/TextEdit.add_color_region(";", "", Color.darkgray)
+	$MainPanel/TextEdit.add_color_region(";", "", Color.DARK_GRAY)
 	for opcode in Opcodes.dict:
-		$MainPanel/TextEdit.add_keyword_color(opcode, Color.green)
-		$MainPanel/TextEdit.add_keyword_color(opcode.to_lower(), Color.green)
+		$MainPanel/TextEdit.add_keyword_color(opcode, Color.GREEN)
+		$MainPanel/TextEdit.add_keyword_color(opcode.to_lower(), Color.GREEN)
 
 func pixel_size():
 	return get_viewport().size.x / screen_size
@@ -74,7 +74,7 @@ func log_line():
 	$MainPanel/TabContainer/Status.write_linebreak()
 
 func _unhandled_key_input(event):
-	match event.scancode:
+	match event.keycode:
 		KEY_F1:
 			# load non-packaged file
 			open_file_dialog(false)

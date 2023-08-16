@@ -10,7 +10,7 @@ var current_pc = start_pc
 var logger: Node
 var hexdump_logger: TextEdit
 
-var assembled: PoolByteArray
+var assembled: PackedByteArray
 var operand_re = RegEx.new()
 var whitespace_re = RegEx.new()
 var labeldef_re = RegEx.new()
@@ -47,7 +47,7 @@ func _init():
 	program_offset_re.compile("^\\*=(\\$?\\w+)$")
 	high_byte_re.compile("^#>(\\w+)$")
 	low_byte_re.compile("^#<(\\w+)$")
-	assembled = PoolByteArray()
+	assembled = PackedByteArray()
 	logger = null
 
 func debug_print(debug_str):
@@ -112,7 +112,7 @@ func clean_line(line:String):
 		return opcode # no operands
 
 	parts.remove(0)
-	cleaned = opcode + " " + whitespace_re.sub(parts.join(" "), " ", true)
+	cleaned = opcode + " " + whitespace_re." ".join(sub(parts), " ", true)
 	return cleaned
 
 func dcb_to_bytes(operands:String):
@@ -131,7 +131,7 @@ func dcb_to_bytes(operands:String):
 				return null
 			b = ("0x" + byte.substr(1)).hex_to_int()
 		else:
-			if !byte.is_valid_integer():
+			if !byte.is_valid_int():
 				return null
 			b = byte.to_int()
 		bytes.append(b & 0xFF)
@@ -147,7 +147,7 @@ func append_bytes(bytes: Array, on_invalid = INVALID_SYNTAX):
 # Cleans and compiles `line` into 6502 bytecode
 func assemble_line(line: String):
 	if assembled == null:
-		assembled = PoolByteArray()
+		assembled = PackedByteArray()
 
 	var cleaned = clean_line(line)
 	if cleaned == "":
@@ -160,7 +160,7 @@ func assemble_line(line: String):
 		if matched.strings[1][0] == "$" and matched.strings[1].substr(1).is_valid_hex_number(false):
 			# hexadecimal address, ex: *=$0600
 			addr = ("0x" + matched.strings[1].substr(1)).hex_to_int() 
-		elif matched.strings[1].is_valid_integer():
+		elif matched.strings[1].is_valid_int():
 			# decimal address, ex: *=1536
 			addr = matched.strings[1].to_int()
 		if addr < 0 or addr > 0xFFFF:
@@ -216,7 +216,7 @@ func assemble_line(line: String):
 			value = strings[4].to_int()
 		return append_bytes(get_instruction_bytes(opcode, Opcodes.IMMEDIATE_ADDR, value))
 
-	var is_label = (not strings[4].is_valid_integer()) and strings[3] != "$"
+	var is_label = (not strings[4].is_valid_int()) and strings[3] != "$"
 	var num: int
 	if is_label:
 		num = unset_label

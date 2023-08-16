@@ -6,46 +6,13 @@
 ;   [section] ; section goes between []
 ;   param=value ; assign values to parameters
 
-config_version=4
-
-_global_script_classes=[ {
-"base": "Reference",
-"class": "Assembler",
-"language": "GDScript",
-"path": "res://src/demo/Assembler.gd"
-}, {
-"base": "Node",
-"class": "CPU",
-"language": "GDScript",
-"path": "res://src/cpu/CPU.gd"
-}, {
-"base": "Reference",
-"class": "GutHookScript",
-"language": "GDScript",
-"path": "res://addons/gut/hook_script.gd"
-}, {
-"base": "Node",
-"class": "GutTest",
-"language": "GDScript",
-"path": "res://addons/gut/test.gd"
-}, {
-"base": "Reference",
-"class": "Opcodes",
-"language": "GDScript",
-"path": "res://src/cpu/Opcodes.gd"
-} ]
-_global_script_class_icons={
-"Assembler": "",
-"CPU": "",
-"GutHookScript": "",
-"GutTest": "",
-"Opcodes": ""
-}
+config_version=5
 
 [application]
 
 config/name="GD6502"
 run/main_scene="res://src/Main.tscn"
+config/features=PackedStringArray("4.1")
 boot_splash/image="res://assets/icon.png"
 boot_splash/fullsize=false
 config/icon="res://assets/icon.png"
@@ -53,12 +20,12 @@ config/windows_native_icon="res://assets/icon.ico"
 
 [display]
 
-window/size/width=688
-window/size/height=548
+window/size/viewport_width=688
+window/size/viewport_height=548
 
 [editor_plugins]
 
-enabled=PoolStringArray( "res://addons/gut/plugin.cfg" )
+enabled=PackedStringArray("res://addons/gut/plugin.cfg")
 
 [physics]
 
@@ -66,7 +33,6 @@ common/enable_pause_aware_picking=true
 
 [rendering]
 
+environment/defaults/default_environment="res://default_env.tres"
 quality/driver/driver_name="GLES2"
 vram_compression/import_etc=true
-vram_compression/import_etc2=false
-environment/default_environment="res://default_env.tres"

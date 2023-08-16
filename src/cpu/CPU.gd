@@ -48,7 +48,7 @@ func set_status(new_status: int):
 	_status = new_status
 	emit_signal("status_changed", _status, old)
 
-func load_bytes(bytes:PoolByteArray):
+func load_bytes(bytes:PackedByteArray):
 	memory.resize(PC_START + bytes.size())
 	memory_size = memory.size()
 	for b in bytes:

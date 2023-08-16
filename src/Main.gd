@@ -32,7 +32,7 @@ const REPO_URL = "https://github.com/Eggbertx/GD6502"
 const SETTINGS_PATH = "user://settings.save"
 var logger: Node
 var asm: Assembler
-onready var emulator_menu = $UI/MenuPanel/HBoxContainer/EmulatorButton.get_popup()
+@onready var emulator_menu = $UI/MenuPanel/HBoxContainer/EmulatorButton.get_popup()
 
 func _ready():
 	load_settings()
@@ -48,7 +48,7 @@ func _ready():
 func _input(event):
 	if event is InputEventKey:
 		if $CPU.get_status() == $CPU.M6502_RUNNING and $CPU.memory.size() >= 0xFF:
-			$CPU.memory[0xFF] = event.scancode & 0xFF
+			$CPU.memory[0xFF] = event.keycode & 0xFF
 
 func _notification(what: int) -> void:
 	if what == MainLoop.NOTIFICATION_WM_QUIT_REQUEST:
@@ -59,8 +59,8 @@ func save_settings():
 	if file.open(SETTINGS_PATH, File.WRITE) != OK:
 		OS.alert("Failed saving settings")
 		return
-	file.store_var(OS.window_maximized)
-	file.store_var(OS.window_size)
+	file.store_var((get_window().mode == Window.MODE_MAXIMIZED))
+	file.store_var(get_window().size)
 	file.close()
 
 func load_settings():
@@ -71,8 +71,8 @@ func load_settings():
 		$UI.log_print("Failed loading settings")
 		return
 
-	OS.window_maximized = file.get_var()
-	OS.window_size = file.get_var()
+	get_window().mode = Window.MODE_MAXIMIZED if (file.get_var()) else Window.MODE_WINDOWED
+	get_window().size = file.get_var()
 	file.close()
 
 func assemble_code():
