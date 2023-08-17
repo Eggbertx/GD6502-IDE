@@ -4,29 +4,30 @@ enum {
 	FILE_OPEN_FILE,
 	FILE_OPEN_EXAMPLE,
 	FILE_SEPARATOR1,
-	FILE_SAVE_FILE,
-	FILE_SAVE_FILE_AS,
+	FILE_SAVE,
+	FILE_SAVE_AS,
 	FILE_SEPARATOR2,
-	FILE_QUIT,
+	FILE_EXIT,
 }
-enum {
-	HELP_REPO,
-	HELP_EASY6502,
-	HELP_6502ORG,
-	HELP_WP_6502
-}
-
 enum {
 	EMULATOR_ASSEMBLE,
 	EMULATOR_START,
-	EMULATOR_PAUSED,
+	EMULATOR_PAUSE,
+	EMULATOR_STOP,
+	EMULATOR_SEPARATOR1,
 	EMULATOR_STEP_FORWARD,
 	EMULATOR_STEP_BACK,
-	EMULATOR_SEPARATOR,
-	EMULATOR_STOP,
 	EMULATOR_GOTO,
+	EMULATOR_SEPARATOR2,
 	EMULATOR_CLEAR_LOG
 }
+enum {
+	HELP_6502ORG,
+	HELP_WP_6502,
+	HELP_EASY6502,
+	HELP_REPO
+}
+
 
 const REPO_URL = "https://github.com/Eggbertx/GD6502"
 const SETTINGS_PATH = "user://settings.save"
@@ -109,7 +110,7 @@ func _on_UI_file_item_selected(id):
 			$UI.open_file_dialog(false)
 		FILE_OPEN_EXAMPLE:
 			$UI.open_file_dialog(true)
-		FILE_QUIT:
+		FILE_EXIT:
 			get_tree().quit(0)
 
 func _on_UI_emulator_item_selected(id) -> void:
@@ -119,7 +120,7 @@ func _on_UI_emulator_item_selected(id) -> void:
 			assemble_code()
 		EMULATOR_START:
 			$CPU.set_status(CPU.M6502_RUNNING)
-		EMULATOR_PAUSED:
+		EMULATOR_PAUSE:
 			var status = $CPU.get_status()
 			if status == CPU.M6502_RUNNING:
 				$CPU.set_status(CPU.M6502_PAUSED)
