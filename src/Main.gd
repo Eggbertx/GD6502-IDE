@@ -17,14 +17,14 @@ enum {
 }
 
 enum {
-	EMULATOR_ASSEMBLE
-	EMULATOR_START
-	EMULATOR_PAUSED
-	EMULATOR_STEP_FORWARD
-	EMULATOR_STEP_BACK
-	EMULATOR_SEPARATOR
-	EMULATOR_STOP
-	EMULATOR_GOTO
+	EMULATOR_ASSEMBLE,
+	EMULATOR_START,
+	EMULATOR_PAUSED,
+	EMULATOR_STEP_FORWARD,
+	EMULATOR_STEP_BACK,
+	EMULATOR_SEPARATOR,
+	EMULATOR_STOP,
+	EMULATOR_GOTO,
 	EMULATOR_CLEAR_LOG
 }
 
@@ -42,8 +42,8 @@ func _ready():
 	asm.set_logger(logger)
 	asm.set_hexdump_logger($UI/MainPanel/TabContainer/Hexdump)
 	var args = OS.get_cmdline_args()
-	if args.size() > 0:
-		open_rom(args[0])
+	if args.size() > 1:
+		open_rom(args[1])
 
 func _input(event):
 	if event is InputEventKey:
@@ -51,24 +51,26 @@ func _input(event):
 			$CPU.memory[0xFF] = event.keycode & 0xFF
 
 func _notification(what: int) -> void:
-	if what == MainLoop.NOTIFICATION_WM_QUIT_REQUEST:
+	if what == NOTIFICATION_WM_CLOSE_REQUEST or what == NOTIFICATION_EXIT_TREE:
 		save_settings()
 
 func save_settings():
-	var file = File.new()
-	if file.open(SETTINGS_PATH, File.WRITE) != OK:
+	var file := FileAccess.open(SETTINGS_PATH, FileAccess.WRITE)
+	if file == null:
 		OS.alert("Failed saving settings")
+		printerr(FileAccess.get_open_error())
 		return
 	file.store_var((get_window().mode == Window.MODE_MAXIMIZED))
 	file.store_var(get_window().size)
 	file.close()
 
 func load_settings():
-	var file = File.new()
-	if !file.file_exists(SETTINGS_PATH):
+	if !FileAccess.file_exists(SETTINGS_PATH):
 		return
-	if file.open(SETTINGS_PATH, File.READ) != OK:
-		$UI.log_print("Failed loading settings")
+
+	var file := FileAccess.open(SETTINGS_PATH, FileAccess.READ)
+	if file == null:
+		$UI.log_print("Failed loading settings: %" % FileAccess.get_open_error())
 		return
 
 	get_window().mode = Window.MODE_MAXIMIZED if (file.get_var()) else Window.MODE_WINDOWED
@@ -88,10 +90,9 @@ func open_rom(path):
 	$UI.log_print("Loading file: %s" % path)
 	$UI.log_line()
 	$CPU.memory.resize($CPU.PC_START)
-	var file = File.new()
-	var err = file.open(path, File.READ)
-	if err != OK:
-		$UI.log("Got error code %d while loading %s" % [err, path])
+	var file := FileAccess.open(path, FileAccess.READ)
+	if file == null:
+		$UI.log_print("Got error code %d while loading %s" % [FileAccess.get_open_error(), path])
 		return
 
 	asm.asm_str = file.get_as_text()

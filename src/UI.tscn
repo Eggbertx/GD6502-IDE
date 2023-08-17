@@ -11,6 +11,8 @@ layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1")
 
 [node name="MenuPanel" type="Panel" parent="."]
@@ -55,15 +57,15 @@ anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_top = 36.0
-offset_bottom = 16.0
+offset_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Screen" parent="MainPanel" instance=ExtResource("2")]
-scale = Vector2(8, 8)
+scale = Vector2(256, 256)
 centered = false
 
-[node name="TextEdit" type="TextEdit" parent="MainPanel"]
+[node name="CodeEdit" type="CodeEdit" parent="MainPanel"]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0

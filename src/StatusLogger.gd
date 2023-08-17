@@ -21,6 +21,6 @@ func write(s):
 func write_linebreak():
 	write_line("--------------------------------")
 
-func clear():
-	text = ""
+#func clear():
+#	text = ""
 

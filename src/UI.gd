@@ -8,9 +8,10 @@ signal help_item_selected
 const pixel_scale = 8
 const screen_size = 32
 
-@onready var file_menu = $MenuPanel/HBoxContainer/FileButton.get_popup()
-@onready var emulator_menu = $MenuPanel/HBoxContainer/EmulatorButton.get_popup()
-@onready var help_menu = $MenuPanel/HBoxContainer/HelpButton.get_popup()
+@onready var file_menu:PopupMenu = $MenuPanel/HBoxContainer/FileButton.get_popup()
+@onready var emulator_menu:PopupMenu = $MenuPanel/HBoxContainer/EmulatorButton.get_popup()
+@onready var help_menu:PopupMenu = $MenuPanel/HBoxContainer/HelpButton.get_popup()
+@onready var code_edit := $MainPanel/CodeEdit
 var loaded_file = ""
 
 func _ready():
@@ -20,11 +21,10 @@ func _ready():
 	init_syntax_highlighting()
 
 func init_syntax_highlighting():
-	$MainPanel/TextEdit.grab_focus()
-	$MainPanel/TextEdit.add_color_region(";", "", Color.DARK_GRAY)
+	code_edit.grab_focus()
+	code_edit.add_comment_delimiter(";", "", true)
 	for opcode in Opcodes.dict:
-		$MainPanel/TextEdit.add_keyword_color(opcode, Color.GREEN)
-		$MainPanel/TextEdit.add_keyword_color(opcode.to_lower(), Color.GREEN)
+		code_edit.add_code_completion_option(CodeEdit.KIND_FUNCTION, opcode, opcode)
 
 func pixel_size():
 	return get_viewport().size.x / screen_size
@@ -42,9 +42,9 @@ func open_file_dialog(examples = true):
 	$FileDialog.popup()
 
 func set_assembly_source(text: String, clear_undo = true):
-	$MainPanel/TextEdit.text = text
+	code_edit.text = text
 	if clear_undo:
-		$MainPanel/TextEdit.clear_undo_history()
+		code_edit.clear_undo_history()
 
 func open_goto():
 	$GoToAddressDialog.visible = true

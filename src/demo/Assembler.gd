@@ -83,10 +83,9 @@ func get_instruction_bytes(opcode:String, addr_mode:int, arg:int = -1):
 
 func load_asm(asm_path:String):
 	asm_file = asm_path
-	var file = File.new()
-	var err = file.open(asm_path, File.READ)
-	if err:
-		return err
+	var file = FileAccess.open(asm_path, FileAccess.READ)
+	if file == null:
+		return FileAccess.get_open_error()
 	asm_str = file.get_as_text()
 	file.close()
 
@@ -111,8 +110,9 @@ func clean_line(line:String):
 	if parts.size() == 1:
 		return opcode # no operands
 
-	parts.remove(0)
-	cleaned = opcode + " " + whitespace_re." ".join(sub(parts), " ", true)
+	parts.remove_at(0)
+	cleaned = opcode + " " + whitespace_re.sub(" ".join(parts), " ", true)
+
 	return cleaned
 
 func dcb_to_bytes(operands:String):
