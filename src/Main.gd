@@ -11,9 +11,9 @@ enum {
 }
 enum {
 	HELP_REPO,
-	HELP_6502ASM,
 	HELP_EASY6502,
-	HELP_6502ORG
+	HELP_6502ORG,
+	HELP_WP_6502
 }
 
 enum {
@@ -140,12 +140,12 @@ func _on_UI_help_item_selected(id):
 	match id:
 		HELP_REPO:
 			OS.shell_open(REPO_URL)
-		HELP_6502ASM:
-			OS.shell_open("http://6502asm.com/")
 		HELP_EASY6502:
 			OS.shell_open("https://skilldrick.github.io/easy6502/")
 		HELP_6502ORG:
 			OS.shell_open("http://www.6502.org/")
+		HELP_WP_6502:
+			OS.shell_open("https://en.wikipedia.org/wiki/MOS_Technology_6502")
 
 func _on_UI_file_selected(file):
 	open_rom(file)
