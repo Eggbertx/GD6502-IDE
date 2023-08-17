@@ -12,6 +12,8 @@ const screen_size = 32
 @onready var emulator_menu:PopupMenu = $MenuPanel/HBoxContainer/EmulatorButton.get_popup()
 @onready var help_menu:PopupMenu = $MenuPanel/HBoxContainer/HelpButton.get_popup()
 @onready var code_edit := $MainPanel/CodeEdit
+@onready var highlighter :SyntaxHighlighter = code_edit.syntax_highlighter
+
 var loaded_file = ""
 
 func _ready():
@@ -22,9 +24,10 @@ func _ready():
 
 func init_syntax_highlighting():
 	code_edit.grab_focus()
-	code_edit.add_comment_delimiter(";", "", true)
 	for opcode in Opcodes.dict:
-		code_edit.add_code_completion_option(CodeEdit.KIND_FUNCTION, opcode, opcode)
+		highlighter.keyword_colors[opcode] = Color.CYAN
+		highlighter.keyword_colors[opcode.to_lower()] = Color.CYAN
+
 
 func pixel_size():
 	return get_viewport().size.x / screen_size
