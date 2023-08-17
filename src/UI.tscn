@@ -1,7 +1,7 @@
 [gd_scene load_steps=7 format=3 uid="uid://cikoitjwng02w"]
 
 [ext_resource type="Script" path="res://src/UI.gd" id="1"]
-[ext_resource type="PackedScene" path="res://src/Screen.tscn" id="2"]
+[ext_resource type="PackedScene" uid="uid://de851dmqya5ph" path="res://src/Screen.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://src/GoToAddress.tscn" id="3"]
 [ext_resource type="PackedScene" path="res://src/StatusLogger.tscn" id="4"]
 [ext_resource type="FontFile" path="res://assets/NotoSansMonoRegular.tres" id="5"]
@@ -67,7 +67,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Screen" parent="MainPanel" instance=ExtResource("2")]
-scale = Vector2(256, 256)
+scale = Vector2(8, 8)
 centered = false
 
 [node name="CodeEdit" type="CodeEdit" parent="MainPanel"]

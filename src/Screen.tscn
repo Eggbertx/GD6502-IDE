@@ -1,10 +1,7 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=2 format=3 uid="uid://de851dmqya5ph"]
 
-[ext_resource path="res://src/Screen.gd" type="Script" id=1]
-
-[sub_resource type="ImageTexture" id=1]
-size = Vector2( 32, 32 )
+[ext_resource type="Script" path="res://src/Screen.gd" id="1"]
 
 [node name="Screen" type="Sprite2D"]
-texture = SubResource( 1 )
-script = ExtResource( 1 )
+scale = Vector2(256, 256)
+script = ExtResource("1")
