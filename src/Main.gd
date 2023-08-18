@@ -28,12 +28,10 @@ enum {
 	HELP_REPO
 }
 
-
 const REPO_URL = "https://github.com/Eggbertx/GD6502"
 const SETTINGS_PATH = "user://settings.save"
 var logger: Node
 var asm: Assembler
-@onready var emulator_menu = $UI/MenuPanel/HBoxContainer/EmulatorButton.get_popup()
 
 func _ready():
 	load_settings()
@@ -82,12 +80,12 @@ func assemble_code():
 	var success = asm.assemble()
 	asm.update_hexdump()
 	$CPU.reset($CPU.M6502_STOPPED)
-	emulator_menu.set_item_disabled(1, asm.asm_str == "" or success != OK)
+	# emulator_menu.set_item_disabled(1, asm.asm_str == "" or success != OK)
 	if success != OK:
 		$UI/MainPanel/TabContainer.current_tab = 0
 	return success
 
-func open_rom(path):
+func open_rom(path: String):
 	$UI.log_print("Loading file: %s" % path)
 	$UI.log_line()
 	$CPU.memory.resize($CPU.PC_START)
@@ -104,7 +102,7 @@ func open_rom(path):
 		$CPU.reset($CPU.M6502_RUNNING)
 		$CPU.execute()
 
-func _on_UI_file_item_selected(id):
+func _on_ui_file_item_selected(id: int):
 	match id:
 		FILE_OPEN_FILE:
 			$UI.open_file_dialog(false)
@@ -113,10 +111,10 @@ func _on_UI_file_item_selected(id):
 		FILE_EXIT:
 			get_tree().quit(0)
 
-func _on_UI_emulator_item_selected(id) -> void:
+func _on_ui_emulator_item_selected(id: int):
 	match id:
 		EMULATOR_ASSEMBLE:
-			asm.asm_str = $UI/MainPanel/TextEdit.text
+			asm.asm_str = $UI/MainPanel/CodeEdit.text
 			assemble_code()
 		EMULATOR_START:
 			$CPU.set_status(CPU.M6502_RUNNING)
@@ -137,7 +135,7 @@ func _on_UI_emulator_item_selected(id) -> void:
 		EMULATOR_CLEAR_LOG:
 			$UI/MainPanel/TabContainer/Status.clear()
 
-func _on_UI_help_item_selected(id):
+func _on_ui_help_item_selected(id: int):
 	match id:
 		HELP_REPO:
 			OS.shell_open(REPO_URL)
@@ -147,10 +145,6 @@ func _on_UI_help_item_selected(id):
 			OS.shell_open("http://www.6502.org/")
 		HELP_WP_6502:
 			OS.shell_open("https://en.wikipedia.org/wiki/MOS_Technology_6502")
-
-func _on_UI_file_selected(file):
-	open_rom(file)
-
 
 func _on_CPU_status_changed(new_status: int, old_status: int) -> void:
 	match new_status:
@@ -164,3 +158,5 @@ func _on_CPU_status_changed(new_status: int, old_status: int) -> void:
 		CPU.M6502_PAUSED:
 			if old_status == CPU.M6502_RUNNING:
 				logger.write_line("Pausing emulator")
+
+

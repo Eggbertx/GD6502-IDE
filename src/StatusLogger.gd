@@ -3,7 +3,7 @@ extends TextEdit
 func _init() -> void:
 	var menu = get_menu()
 	menu.add_item("Clear")
-	menu.connect("id_pressed", Callable(self, "context_menu_selected"))
+	menu.connect("id_pressed", context_menu_selected)
 
 func context_menu_selected(id):
 	var item_text = get_menu().get_item_text(id)

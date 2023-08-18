@@ -17,9 +17,9 @@ const screen_size = 32
 var loaded_file = ""
 
 func _ready():
-	file_menu.connect("id_pressed", Callable(self, "file_menu_selected"))
-	emulator_menu.connect("id_pressed", Callable(self, "emulator_menu_selected"))
-	help_menu.connect("id_pressed", Callable(self, "help_menu_selected"))
+	file_menu.connect("id_pressed", file_menu_selected)
+	emulator_menu.connect("id_pressed", emulator_menu_selected)
+	help_menu.connect("id_pressed", help_menu_selected)
 	init_syntax_highlighting()
 
 func init_syntax_highlighting():
@@ -35,6 +35,7 @@ func pixel_size():
 func open_file_dialog(examples = true):
 	if $FileDialog.visible:
 		return
+	$FileDialog.file_mode = EditorFileDialog.FILE_MODE_OPEN_FILE
 	if examples:
 		$FileDialog.access = FileDialog.ACCESS_RESOURCES
 		$FileDialog.set_title("Open example")
