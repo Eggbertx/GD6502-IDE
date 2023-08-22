@@ -80,9 +80,7 @@ func assemble_code():
 	var success = asm.assemble()
 	asm.update_hexdump()
 	$CPU.reset($CPU.M6502_STOPPED)
-	# emulator_menu.set_item_disabled(1, asm.asm_str == "" or success != OK)
-	if success != OK:
-		$UI/MainPanel/TabContainer.current_tab = 0
+	$UI/MainPanel/TabContainer.current_tab = 0
 	return success
 
 func open_rom(path: String):
@@ -115,7 +113,7 @@ func _on_ui_emulator_item_selected(id: int):
 	match id:
 		EMULATOR_ASSEMBLE:
 			asm.asm_str = $UI/MainPanel/CodeEdit.text
-			assemble_code()
+			$UI.emulator_menu.set_item_disabled(EMULATOR_START, assemble_code() != OK)
 		EMULATOR_START:
 			$CPU.set_status(CPU.M6502_RUNNING)
 		EMULATOR_PAUSE:
