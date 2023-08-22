@@ -22,10 +22,10 @@ enum {
 	EMULATOR_CLEAR_LOG
 }
 enum {
+	HELP_REPO,
 	HELP_6502ORG,
 	HELP_WP_6502,
-	HELP_EASY6502,
-	HELP_REPO
+	HELP_EASY6502
 }
 
 const REPO_URL = "https://github.com/Eggbertx/GD6502"
@@ -137,12 +137,12 @@ func _on_ui_help_item_selected(id: int):
 	match id:
 		HELP_REPO:
 			OS.shell_open(REPO_URL)
-		HELP_EASY6502:
-			OS.shell_open("https://skilldrick.github.io/easy6502/")
 		HELP_6502ORG:
 			OS.shell_open("http://www.6502.org/")
 		HELP_WP_6502:
 			OS.shell_open("https://en.wikipedia.org/wiki/MOS_Technology_6502")
+		HELP_EASY6502:
+			OS.shell_open("https://skilldrick.github.io/easy6502/")
 
 func _on_CPU_status_changed(new_status: int, old_status: int) -> void:
 	match new_status:
