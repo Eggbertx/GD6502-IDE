@@ -124,6 +124,7 @@ func _on_ui_emulator_item_selected(id: int):
 		EMULATOR_START:
 			$CPU.set_status(CPU.M6502_RUNNING)
 			$ClockTimer.start()
+			$CPU.execute()
 		EMULATOR_PAUSE:
 			var status = $CPU.get_status()
 			if status == CPU.M6502_RUNNING:
@@ -169,3 +170,4 @@ func _on_CPU_status_changed(new_status: int, old_status: int) -> void:
 func _on_clock_timer_timeout():
 	if $CPU.get_status() == CPU.M6502_RUNNING:
 		$CPU.execute()
+		$UI.update_register_info($CPU.A, $CPU.X, $CPU.Y, $CPU.PC, $CPU.SP)

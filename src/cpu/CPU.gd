@@ -23,11 +23,11 @@ const PC_START = 0x0600
 
 
 # registers
-var accumulator = 0
-var x = 0
-var y = 0
-var SP = 0
+var A = 0
+var X = 0
+var Y = 0
 var PC = PC_START
+var SP = 0
 var _status = M6502_STOPPED
 var memory = []
 var memory_size = 0
@@ -59,22 +59,22 @@ func set_logger(newlogger):
 
 func print_info():
 	if logger != null:
-		logger.write_line("Accumulator: %x" % accumulator)
-		logger.write_line("X: %x" % x)
-		logger.write_line("Y: %x" % y)
-		logger.write_line("Stack pointer: %x" % SP)
+		logger.write_line("Accumulator: %x" % A)
+		logger.write_line("X: %x" % X)
+		logger.write_line("Y: %x" % Y)
 		logger.write_line("PC: %x" % PC)
+		logger.write_line("Stack pointer: %x" % SP)
 		logger.write_line("Opcode: %x" % opcode)
 
 func _process(_delta:float):
 	execute()
 
 func reset(reset_status:int = _status):
-	accumulator = 0
-	x = 0
-	y = 0
-	SP = 0
+	A = 0
+	X = 0
+	Y = 0
 	PC = PC_START
+	SP = 0
 	set_status(reset_status)
 
 # basic memory operations

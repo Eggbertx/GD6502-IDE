@@ -7,6 +7,7 @@ signal help_item_selected
 
 const pixel_scale = 8
 const screen_size = 32
+const register_label_format = "A: $%02X    X: $%02X    Y: $%02X    PC: $%04X    SP: $%04X"
 
 @onready var file_menu:PopupMenu = $MenuPanel/HBoxContainer/FileButton.get_popup()
 @onready var emulator_menu:PopupMenu = $MenuPanel/HBoxContainer/EmulatorButton.get_popup()
@@ -76,6 +77,9 @@ func log_reset():
 	
 func log_line():
 	$MainPanel/TabContainer/Status.write_linebreak()
+
+func update_register_info(a: int, x: int, y: int, pc: int, sp: int):
+	$MainPanel/RegisterInfo.set_text(register_label_format % [a, x, y, pc, sp])
 
 func _unhandled_key_input(event):
 	match event.keycode:
