@@ -102,7 +102,7 @@ func execute(new_PC = -1):
 		return
 	if new_PC > -1:
 		PC = new_PC
-	#print_info()
+
 	if PC >= memory.size():
 		set_status(M6502_STOPPED)
 

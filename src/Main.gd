@@ -100,6 +100,13 @@ func open_rom(path: String):
 		$CPU.reset($CPU.M6502_RUNNING)
 		$CPU.execute()
 
+func enable_emulation(enabled: bool):
+	$UI.emulator_menu.set_item_disabled(EMULATOR_START, !enabled)
+	$UI.emulator_menu.set_item_disabled(EMULATOR_PAUSE, !enabled)
+	$UI.emulator_menu.set_item_disabled(EMULATOR_STOP, !enabled)
+	$UI.emulator_menu.set_item_disabled(EMULATOR_STEP_FORWARD, !enabled)
+	$UI.emulator_menu.set_item_disabled(EMULATOR_GOTO, !enabled)
+
 func _on_ui_file_item_selected(id: int):
 	match id:
 		FILE_OPEN_FILE:
@@ -113,9 +120,10 @@ func _on_ui_emulator_item_selected(id: int):
 	match id:
 		EMULATOR_ASSEMBLE:
 			asm.asm_str = $UI/MainPanel/CodeEdit.text
-			$UI.emulator_menu.set_item_disabled(EMULATOR_START, assemble_code() != OK)
+			enable_emulation(assemble_code() == OK)
 		EMULATOR_START:
 			$CPU.set_status(CPU.M6502_RUNNING)
+			$ClockTimer.start()
 		EMULATOR_PAUSE:
 			var status = $CPU.get_status()
 			if status == CPU.M6502_RUNNING:
@@ -128,6 +136,7 @@ func _on_ui_emulator_item_selected(id: int):
 			logger.write_line("Stepping back")
 		EMULATOR_STOP:
 			$CPU.set_status(CPU.M6502_STOPPED)
+			$ClockTimer.stop()
 		EMULATOR_GOTO:
 			$UI/GoToAddressDialog.show()
 		EMULATOR_CLEAR_LOG:
@@ -157,4 +166,6 @@ func _on_CPU_status_changed(new_status: int, old_status: int) -> void:
 			if old_status == CPU.M6502_RUNNING:
 				logger.write_line("Pausing emulator")
 
-
+func _on_clock_timer_timeout():
+	if $CPU.get_status() == CPU.M6502_RUNNING:
+		$CPU.execute()
