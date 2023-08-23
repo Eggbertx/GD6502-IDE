@@ -30,12 +30,11 @@ enum {
 
 const REPO_URL = "https://github.com/Eggbertx/GD6502"
 const SETTINGS_PATH = "user://settings.save"
-var logger: Node
+@onready var logger:TextEdit = $UI/MainPanel/TabContainer/Status
 var asm: Assembler
 
 func _ready():
 	load_settings()
-	logger = $UI/MainPanel/TabContainer/Status
 	$CPU.set_logger(logger)
 	asm = Assembler.new()
 	asm.set_logger(logger)
@@ -101,6 +100,8 @@ func open_rom(path: String):
 		$CPU.execute()
 
 func enable_emulation(enabled: bool):
+	if enabled:
+		$CPU.load_bytes(asm.assembled)
 	$UI.emulator_menu.set_item_disabled(EMULATOR_START, !enabled)
 	$UI.emulator_menu.set_item_disabled(EMULATOR_PAUSE, !enabled)
 	$UI.emulator_menu.set_item_disabled(EMULATOR_STOP, !enabled)

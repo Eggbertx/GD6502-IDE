@@ -188,3 +188,4 @@ editable = false
 
 [connection signal="file_selected" from="FileDialog" to="." method="_on_FileDialog_file_selected"]
 [connection signal="confirmed" from="GoToAddressDialog" to="." method="_on_GoToAddressDialog_confirmed"]
+[connection signal="tab_changed" from="MainPanel/TabContainer" to="." method="_on_tab_container_tab_changed"]

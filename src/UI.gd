@@ -100,3 +100,6 @@ func _on_FileDialog_hide():
 
 func _on_GoToAddressDialog_confirmed():
 	log_print("Going to address %d" % $GoToAddressDialog.get_address())
+
+func _on_tab_container_tab_changed(tab: int):
+	print("Switching to tab %s" % $MainPanel/TabContainer.get_tab_title(tab))
