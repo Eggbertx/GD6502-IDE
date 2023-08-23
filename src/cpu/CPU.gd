@@ -5,33 +5,36 @@ class_name CPU
 signal status_changed
 
 # status register bits
-const STATUS_NONE = 0
-const STATUS_CARRY = 1 
-const STATUS_ZERO = 2
-const STATUS_INTERRUPT = 4
-const STATUS_BCD = 8
-const STATUS_BREAK = 16
-const STATUS_OVERFLOW = 64
-const STATUS_NEGATIVE = 128
+enum flag_bit {
+	CARRY = 1,
+	ZERO = 2,
+	INTERRUPT = 4,
+	BCD = 8,
+	BREAK = 16,
+	# no flag in 6th bit
+	OVERFLOW = 64,
+	NEGATIVE = 128
+}
 
-const M6502_STOPPED = 0
-const M6502_RUNNING = 1
-const M6502_PAUSED = 2
+const M6502_STOPPED := 0
+const M6502_RUNNING := 1
+const M6502_PAUSED := 2
 
-const RAM_END = 0x05FF
-const PC_START = 0x0600
+const RAM_END := 0x05FF
+const PC_START := 0x0600
 
 
 # registers
-var A = 0
-var X = 0
-var Y = 0
-var PC = PC_START
-var SP = 0
-var _status = M6502_STOPPED
-var memory = []
-var memory_size = 0
-var opcode = 0
+var A := 0
+var X := 0
+var Y := 0
+var PC := PC_START
+var SP := 0
+var _status := M6502_STOPPED
+var memory := []
+var memory_size := 0
+var opcode := 0
+var flags := 0
 var logger: Node
 
 func _ready():
@@ -40,6 +43,15 @@ func _ready():
 
 func get_status() -> int:
 	return _status
+
+func get_flag_state(flag: flag_bit) -> bool:
+	return (flags & flag) == flag
+
+func set_flag(flag: flag_bit, state: bool):
+	if state:
+		flags |= flag
+	else:
+		flags &= (~flag)
 
 func set_status(new_status: int):
 	if _status == new_status:
@@ -51,8 +63,8 @@ func set_status(new_status: int):
 func load_bytes(bytes:PackedByteArray):
 	memory.resize(PC_START + bytes.size())
 	memory_size = memory.size()
-	for b in bytes:
-		memory[PC_START + b] = bytes[b]
+	for b in range(bytes.size()):
+		memory[PC_START + b] = bytes.decode_u8(b)
 
 func set_logger(newlogger):
 	logger = newlogger
@@ -308,8 +320,8 @@ func execute(new_PC = -1):
 			pass
 		0xA8:
 			pass
-		0xA9:
-			pass
+		0xA9: # LDA, immediate
+			A = pop_byte()
 		0xAA:
 			pass
 		0xAC:
