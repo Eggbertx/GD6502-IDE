@@ -82,10 +82,10 @@ func assemble_code():
 	$UI/MainPanel/TabContainer.current_tab = 0
 	return success
 
-func run_cpu(paused = false):
-	$CPU.set_status(CPU.status.RUNNING)
-	$CPU.execute()
-	$CPU.set_status(CPU.status.PAUSED if paused else CPU.status.RUNNING)
+func run_cpu(status: int = -1, force = false):
+	if status != -1:
+		$CPU.set_status(status)
+	$CPU.execute(force)
 	update_register_label()
 
 func update_register_label():
@@ -106,7 +106,7 @@ func open_rom(path: String):
 	var success = assemble_code()
 	if success == OK:
 		$CPU.reset($CPU.status.RUNNING)
-		run_cpu()
+		run_cpu($CPU.get_status())
 
 func enable_emulation(enabled: bool):
 	if enabled:
@@ -143,7 +143,7 @@ func _on_ui_emulator_item_selected(id: int):
 				$CPU.set_status(CPU.status.RUNNING)
 		EMULATOR_STEP_FORWARD:
 			logger.write_line("Stepping forward")
-			run_cpu(true)
+			run_cpu(true, true)
 		EMULATOR_STEP_BACK:
 			logger.write_line("Stepping back")
 		EMULATOR_STOP:
@@ -165,7 +165,7 @@ func _on_ui_help_item_selected(id: int):
 		HELP_EASY6502:
 			OS.shell_open("https://skilldrick.github.io/easy6502/")
 
-func _on_CPU_status_changed(new_status: int, old_status: int) -> void:
+func _on_CPU_status_changed(new_status: CPU.status, old_status: int) -> void:
 	update_register_label()
 	if logger == null:
 		print("logger is nil, skipping")
@@ -173,15 +173,19 @@ func _on_CPU_status_changed(new_status: int, old_status: int) -> void:
 	match new_status:
 		CPU.status.STOPPED:
 			logger.write_line("Stopping emulator")
+			$ClockTimer.stop()
 		CPU.status.RUNNING:
 			if old_status == CPU.status.PAUSED:
 				logger.write_line("Unpausing emulator")
 			else:
 				logger.write_line("Starting emulator")
+			$ClockTimer.start()
 		CPU.status.PAUSED:
 			if old_status == CPU.status.RUNNING:
 				logger.write_line("Pausing emulator")
+				$ClockTimer.pause()
 		CPU.status.END:
+			$ClockTimer.stop()
 			logger.write_line("Program end at PC=$%04X" % $CPU.PC)
 
 func _on_clock_timer_timeout():

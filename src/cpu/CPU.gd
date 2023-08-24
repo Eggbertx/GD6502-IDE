@@ -73,18 +73,6 @@ func load_bytes(bytes:PackedByteArray):
 func set_logger(newlogger):
 	logger = newlogger
 
-func print_info():
-	if logger != null:
-		logger.write_line("Accumulator: %x" % A)
-		logger.write_line("X: %x" % X)
-		logger.write_line("Y: %x" % Y)
-		logger.write_line("PC: %x" % PC)
-		logger.write_line("Stack pointer: %x" % SP)
-		logger.write_line("Opcode: %x" % opcode)
-
-func _process(_delta:float):
-	execute()
-
 func reset(reset_status:status = _status):
 	A = 0
 	X = 0
@@ -121,19 +109,21 @@ func _update_zero(register: int):
 func _update_negative(register: int):
 	set_flag(flag_bit.NEGATIVE, (register & 0x80) > 0)
 
-func execute(new_PC = -1):
-	if _status != status.RUNNING:
+func execute(force = false, new_PC = -1):
+	if _status != status.RUNNING and !force:
 		return
 	if new_PC > -1:
 		PC = new_PC
 
 	if PC >= memory.size():
-		set_status(status.END, true)
+		set_status(status.END)
+		return
 
 	opcode = pop_byte()
 	match opcode:
 		0x00: # BRK
 			set_status(status.STOPPED, true)
+			set_flag(flag_bit.BREAK, true)
 		0x01:
 			pass
 		0x05:
