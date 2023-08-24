@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://src/UI.gd" id="1"]
 [ext_resource type="PackedScene" uid="uid://de851dmqya5ph" path="res://src/Screen.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://src/GoToAddress.tscn" id="3"]
-[ext_resource type="PackedScene" path="res://src/StatusLogger.tscn" id="4"]
+[ext_resource type="PackedScene" uid="uid://be0aqcaj5wour" path="res://src/StatusLogger.tscn" id="4"]
 [ext_resource type="FontFile" path="res://assets/NotoSansMonoRegular.tres" id="5"]
 
 [sub_resource type="CodeHighlighter" id="CodeHighlighter_dorh2"]
@@ -151,7 +151,7 @@ delimiter_strings = Array[String]([])
 delimiter_comments = Array[String]([";"])
 code_completion_enabled = true
 
-[node name="RegisterInfo" type="Label" parent="MainPanel"]
+[node name="RegisterInfo" type="RichTextLabel" parent="MainPanel"]
 layout_mode = 1
 anchors_preset = 12
 anchor_top = 1.0
@@ -162,7 +162,12 @@ offset_bottom = -246.0
 grow_horizontal = 2
 grow_vertical = 0
 size_flags_horizontal = 3
-text = "A: $00    X: $00    Y: $00    PC: $0000    SP: $0000"
+bbcode_enabled = true
+text = "A: $00    X: $00    Y: $00    PC: $0000    SP: $0000  |  Flags: [color=red][hint=Negative]N[/hint][/color][color=red][hint=Overflow]V[/hint][/color][color=777]-[/color][color=red][hint=BRK]B[/hint][/color][color=red][hint=BCD]D[/hint][/color][color=red][hint=Interrupt]I[/hint][/color][color=red][hint=Zero]Z[/hint][/color][color=red][hint=Carry]C[/hint][/color]"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MainPanel"]
+layout_mode = 0
+offset_bottom = 92.0
 
 [node name="TabContainer" type="TabContainer" parent="MainPanel"]
 layout_mode = 1

@@ -7,7 +7,7 @@ signal help_item_selected
 
 const pixel_scale = 8
 const screen_size = 32
-const register_label_format = "A: $%02X    X: $%02X    Y: $%02X    PC: $%04X    SP: $%04X"
+const register_label_format = "A: $%02X    X: $%02X    Y: $%02X    PC: $%04X    SP: $%04X  |  Flags: [color=%s][hint=Negative]N[/hint][/color][color=%s][hint=Overflow]V[/hint][/color][color=777]-[/color][color=%s][hint=BRK]B[/hint][/color][color=%s][hint=BCD]D[/hint][/color][color=%s][hint=Interrupt]I[/hint][/color][color=%s][hint=Zero]Z[/hint][/color][color=%s][hint=Carry]C[/hint][/color]"
 
 @onready var file_menu:PopupMenu = $MenuPanel/HBoxContainer/FileButton.get_popup()
 @onready var emulator_menu:PopupMenu = $MenuPanel/HBoxContainer/EmulatorButton.get_popup()
@@ -78,8 +78,17 @@ func log_reset():
 func log_line():
 	$MainPanel/TabContainer/Status.write_linebreak()
 
-func update_register_info(a: int, x: int, y: int, pc: int, sp: int):
-	$MainPanel/RegisterInfo.set_text(register_label_format % [a, x, y, pc, sp])
+func update_register_info(a: int, x: int, y: int, pc: int, sp: int, flags: int):
+	$MainPanel/RegisterInfo.parse_bbcode(register_label_format % [
+		a, x, y, pc, sp,
+		"green" if (flags & CPU.flag_bit.NEGATIVE) == CPU.flag_bit.NEGATIVE else "red",
+		"green" if (flags & CPU.flag_bit.OVERFLOW) == CPU.flag_bit.OVERFLOW else "red",
+		"green" if (flags & CPU.flag_bit.BREAK) == CPU.flag_bit.BREAK else "red",
+		"green" if (flags & CPU.flag_bit.BCD) == CPU.flag_bit.BCD else "red",
+		"green" if (flags & CPU.flag_bit.INTERRUPT) == CPU.flag_bit.INTERRUPT else "red",
+		"green" if (flags & CPU.flag_bit.ZERO) == CPU.flag_bit.ZERO else "red",
+		"green" if (flags & CPU.flag_bit.CARRY) == CPU.flag_bit.CARRY else "red",
+	])
 
 func _unhandled_key_input(event):
 	match event.keycode:

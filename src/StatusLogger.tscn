@@ -1,12 +1,10 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=3 format=3 uid="uid://be0aqcaj5wour"]
 
-[ext_resource path="res://src/StatusLogger.gd" type="Script" id=1]
-[ext_resource path="res://assets/NotoSansMonoRegular.tres" type="FontFile" id=2]
+[ext_resource type="Script" path="res://src/StatusLogger.gd" id="1"]
+[ext_resource type="FontFile" path="res://assets/NotoSansMonoRegular.tres" id="2"]
 
 [node name="StatusLogger" type="TextEdit"]
 offset_right = 40.0
 offset_bottom = 40.0
-theme_override_fonts/font = ExtResource( 2 )
-readonly = true
-wrap_enabled = true
-script = ExtResource( 1 )
+theme_override_fonts/font = ExtResource("2")
+script = ExtResource("1")

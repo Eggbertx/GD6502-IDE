@@ -45,7 +45,7 @@ func _ready():
 
 func _input(event):
 	if event is InputEventKey:
-		if $CPU.get_status() == $CPU.M6502_RUNNING and $CPU.memory.size() >= 0xFF:
+		if $CPU.get_status() == $CPU.status.RUNNING and $CPU.memory.size() >= 0xFF:
 			$CPU.memory[0xFF] = event.keycode & 0xFF
 
 func _notification(what: int) -> void:
@@ -78,9 +78,18 @@ func load_settings():
 func assemble_code():
 	var success = asm.assemble()
 	asm.update_hexdump()
-	$CPU.reset($CPU.M6502_STOPPED)
+	$CPU.reset()
 	$UI/MainPanel/TabContainer.current_tab = 0
 	return success
+
+func run_cpu(paused = false):
+	$CPU.set_status(CPU.status.RUNNING)
+	$CPU.execute()
+	$CPU.set_status(CPU.status.PAUSED if paused else CPU.status.RUNNING)
+	update_register_label()
+
+func update_register_label():
+	$UI.update_register_info($CPU.A, $CPU.X, $CPU.Y, $CPU.PC, $CPU.SP, $CPU.flags)
 
 func open_rom(path: String):
 	$UI.log_print("Loading file: %s" % path)
@@ -96,8 +105,8 @@ func open_rom(path: String):
 	file.close()
 	var success = assemble_code()
 	if success == OK:
-		$CPU.reset($CPU.M6502_RUNNING)
-		$CPU.execute()
+		$CPU.reset($CPU.status.RUNNING)
+		run_cpu()
 
 func enable_emulation(enabled: bool):
 	if enabled:
@@ -123,21 +132,22 @@ func _on_ui_emulator_item_selected(id: int):
 			asm.asm_str = $UI/MainPanel/CodeEdit.text
 			enable_emulation(assemble_code() == OK)
 		EMULATOR_START:
-			$CPU.set_status(CPU.M6502_RUNNING)
+			$CPU.set_status(CPU.status.RUNNING)
 			$ClockTimer.start()
-			$CPU.execute()
+			run_cpu()
 		EMULATOR_PAUSE:
 			var status = $CPU.get_status()
-			if status == CPU.M6502_RUNNING:
-				$CPU.set_status(CPU.M6502_PAUSED)
-			elif status == CPU.M6502_PAUSED:
-				$CPU.set_status(CPU.M6502_RUNNING)
+			if status == CPU.status.RUNNING:
+				$CPU.set_status(CPU.status.PAUSED)
+			elif status == CPU.status.PAUSED:
+				$CPU.set_status(CPU.status.RUNNING)
 		EMULATOR_STEP_FORWARD:
 			logger.write_line("Stepping forward")
+			run_cpu(true)
 		EMULATOR_STEP_BACK:
 			logger.write_line("Stepping back")
 		EMULATOR_STOP:
-			$CPU.set_status(CPU.M6502_STOPPED)
+			$CPU.reset(CPU.status.STOPPED)
 			$ClockTimer.stop()
 		EMULATOR_GOTO:
 			$UI/GoToAddressDialog.show()
@@ -156,19 +166,27 @@ func _on_ui_help_item_selected(id: int):
 			OS.shell_open("https://skilldrick.github.io/easy6502/")
 
 func _on_CPU_status_changed(new_status: int, old_status: int) -> void:
+	update_register_label()
+	if logger == null:
+		print("logger is nil, skipping")
+		return
 	match new_status:
-		CPU.M6502_STOPPED:
+		CPU.status.STOPPED:
 			logger.write_line("Stopping emulator")
-		CPU.M6502_RUNNING:
-			if old_status == CPU.M6502_PAUSED:
+		CPU.status.RUNNING:
+			if old_status == CPU.status.PAUSED:
 				logger.write_line("Unpausing emulator")
 			else:
 				logger.write_line("Starting emulator")
-		CPU.M6502_PAUSED:
-			if old_status == CPU.M6502_RUNNING:
+		CPU.status.PAUSED:
+			if old_status == CPU.status.RUNNING:
 				logger.write_line("Pausing emulator")
+		CPU.status.END:
+			logger.write_line("Program end at PC=$%04X" % $CPU.PC)
 
 func _on_clock_timer_timeout():
-	if $CPU.get_status() == CPU.M6502_RUNNING:
-		$CPU.execute()
-		$UI.update_register_info($CPU.A, $CPU.X, $CPU.Y, $CPU.PC, $CPU.SP)
+	if $CPU.get_status() == CPU.status.RUNNING:
+		run_cpu()
+
+func _on_cpu_cpu_reset():
+	update_register_label()

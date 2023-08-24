@@ -3,6 +3,7 @@ extends Node
 class_name CPU
 
 signal status_changed
+signal cpu_reset
 
 # status register bits
 enum flag_bit {
@@ -16,9 +17,10 @@ enum flag_bit {
 	NEGATIVE = 128
 }
 
-const M6502_STOPPED := 0
-const M6502_RUNNING := 1
-const M6502_PAUSED := 2
+enum status {
+	STOPPED, RUNNING, PAUSED, END
+}
+
 
 const RAM_END := 0x05FF
 const PC_START := 0x0600
@@ -30,7 +32,7 @@ var X := 0
 var Y := 0
 var PC := PC_START
 var SP := 0
-var _status := M6502_STOPPED
+var _status := status.STOPPED
 var memory := []
 var memory_size := 0
 var opcode := 0
@@ -41,7 +43,7 @@ func _ready():
 	reset()
 	logger = null
 
-func get_status() -> int:
+func get_status() -> status:
 	return _status
 
 func get_flag_state(flag: flag_bit) -> bool:
@@ -53,7 +55,9 @@ func set_flag(flag: flag_bit, state: bool):
 	else:
 		flags &= (~flag)
 
-func set_status(new_status: int):
+func set_status(new_status: status, no_reset = false):
+	if new_status == status.STOPPED and !no_reset:
+		reset()
 	if _status == new_status:
 		return
 	var old = _status
@@ -81,13 +85,15 @@ func print_info():
 func _process(_delta:float):
 	execute()
 
-func reset(reset_status:int = _status):
+func reset(reset_status:status = _status):
 	A = 0
 	X = 0
 	Y = 0
 	PC = PC_START
 	SP = 0
-	set_status(reset_status)
+	flags = 0
+	set_status(reset_status, true)
+	cpu_reset.emit()
 
 # basic memory operations
 func pop_byte():
@@ -109,19 +115,25 @@ func push_word(byte:int):
 	push_byte(byte & 0xFF)
 	push_byte((byte >> 8) & 0xFF)
 
+func _update_zero(register: int):
+	set_flag(flag_bit.ZERO, register == 0)
+
+func _update_negative(register: int):
+	set_flag(flag_bit.NEGATIVE, (register & 0x80) > 0)
+
 func execute(new_PC = -1):
-	if _status != M6502_RUNNING:
+	if _status != status.RUNNING:
 		return
 	if new_PC > -1:
 		PC = new_PC
 
 	if PC >= memory.size():
-		set_status(M6502_STOPPED)
+		set_status(status.END, true)
 
 	opcode = pop_byte()
 	match opcode:
 		0x00: # BRK
-			set_status(M6502_STOPPED)
+			set_status(status.STOPPED, true)
 		0x01:
 			pass
 		0x05:
@@ -322,6 +334,8 @@ func execute(new_PC = -1):
 			pass
 		0xA9: # LDA, immediate
 			A = pop_byte()
+			_update_zero(A)
+			_update_negative(A)
 		0xAA:
 			pass
 		0xAC:
