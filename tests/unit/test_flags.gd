@@ -32,7 +32,7 @@ class TestFlags:
 
 	func test_flag_changes():
 		asm.asm_str = """
-ldy 0x82
+ldy #$82
 dey ; $81, negative
 dey ; $80
 dey ; $7f, positive
@@ -40,7 +40,6 @@ iny ; $80, negative
 """
 		assert_eq(asm.assemble(), OK, "Successful assembly")
 		cpu.load_rom(asm.assembled)
-		print(cpu.memory.slice(0x600))
 		cpu.execute(true)
 		debug_flags()
 		assert_eq(cpu.Y, 0x82, "making sure LDY #$82 worked")
