@@ -30,7 +30,7 @@ class TestFlags:
 		assert_false(cpu.get_flag_state(CPU.flag_bit.OVERFLOW))
 		assert_eq(cpu.flags, 0b00001000)
 
-	func test_flag_changes():
+	func test_negative_flag():
 		asm.asm_str = """
 ldy #$82
 dey ; $81, negative
@@ -41,6 +41,14 @@ iny ; $80, negative
 		assert_eq(asm.assemble(), OK, "Successful assembly")
 		cpu.load_rom(asm.assembled)
 		cpu.execute(true)
-		debug_flags()
 		assert_eq(cpu.Y, 0x82, "making sure LDY #$82 worked")
 		assert_true(cpu.get_flag_state(CPU.flag_bit.NEGATIVE), "making sure negative flag was set")
+		cpu.execute(true)
+		assert_eq(cpu.Y, 0x81, "Making sure Y = 0x81 after DEY")
+		assert_true(cpu.get_flag_state(CPU.flag_bit.NEGATIVE), "making sure negative flag is still set")
+		cpu.execute(true)
+		assert_eq(cpu.Y, 0x80, "Making sure Y = 0x80 after DEY")
+		assert_true(cpu.get_flag_state(CPU.flag_bit.NEGATIVE), "making sure negative flag is still set")
+		cpu.execute(true)
+		assert_eq(cpu.Y, 0x7F, "Making sure Y = 0x7F after DEY")
+		assert_false(cpu.get_flag_state(CPU.flag_bit.NEGATIVE), "making sure negative flag is no longer set")
