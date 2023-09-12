@@ -4,6 +4,8 @@ class_name CPU
 
 signal status_changed
 signal cpu_reset
+signal rom_loaded
+signal rom_unloaded
 
 # status register bits
 enum flag_bit {
@@ -21,10 +23,8 @@ enum status {
 	STOPPED, RUNNING, PAUSED, END
 }
 
-
 const RAM_END := 0x05FF
 const PC_START := 0x0600
-
 
 # registers
 var A := 0
@@ -62,13 +62,21 @@ func set_status(new_status: status, no_reset = false):
 		return
 	var old = _status
 	_status = new_status
-	emit_signal("status_changed", _status, old)
+	status_changed.emit(_status, old)
 
-func load_bytes(bytes:PackedByteArray):
+func load_rom(bytes:PackedByteArray):
 	memory.resize(PC_START + bytes.size())
 	memory_size = memory.size()
 	for b in range(bytes.size()):
 		memory[PC_START + b] = bytes.decode_u8(b)
+	rom_loaded.emit(bytes.size())
+
+func unload_rom():
+	memory.resize(PC_START)
+	memory_size = PC_START
+	for b in range(memory_size):
+		memory[b] = 0
+	rom_unloaded.emit()
 
 func set_logger(newlogger):
 	logger = newlogger
@@ -276,14 +284,19 @@ func execute(force = false, new_PC = -1):
 			pass
 		0x84:
 			pass
-		0x85:
-			pass
+		0x85: # STA, zero page
+			var zp = pop_byte()
+			memory[zp] = A
 		0x86:
 			pass
-		0x88:
-			pass
-		0x8A:
-			pass
+		0x88: # DEY, implied
+			Y = (Y - 1) & 0xFF
+			_update_negative(Y)
+			_update_zero(Y)
+		0x8A: # TXA, implied
+			A = X
+			_update_negative(A)
+			_update_zero(A)
 		0x8C:
 			pass
 		0x8D:
@@ -300,34 +313,44 @@ func execute(force = false, new_PC = -1):
 			pass
 		0x96:
 			pass
-		0x98:
-			pass
+		0x98: # TYA, implied
+			A = Y
+			_update_zero(A)
+			_update_negative(A)
 		0x99:
 			pass
 		0x9A:
 			pass
 		0x9D:
 			pass
-		0xA0:
-			pass
+		0xA0: # LDY, immediate
+			Y = pop_byte()
+			_update_zero(Y)
+			_update_negative(Y)
 		0xA1:
 			pass
-		0xA2:
-			pass
+		0xA2: # LDX, immediate
+			X = pop_byte()
+			_update_zero(X)
+			_update_negative(X)
 		0xA4:
 			pass
 		0xA5:
 			pass
 		0xA6:
 			pass
-		0xA8:
-			pass
+		0xA8: # TAY, implied
+			Y = A
+			_update_zero(Y)
+			_update_negative(Y)
 		0xA9: # LDA, immediate
 			A = pop_byte()
 			_update_zero(A)
 			_update_negative(A)
-		0xAA:
-			pass
+		0xAA: # TAX, implied
+			X = A
+			_update_zero(X)
+			_update_negative(X)
 		0xAC:
 			pass
 		0xAD:
@@ -364,14 +387,21 @@ func execute(force = false, new_PC = -1):
 			pass
 		0xC5:
 			pass
-		0xC6:
-			pass
-		0xC8:
-			pass
+		0xC6: #DEC, zero page
+			var zp = pop_byte()
+			memory[zp] = (memory[zp] - 1) & 0xFF
+			_update_zero(memory[zp])
+			_update_negative(memory[zp])
+		0xC8: # INY, implied
+			Y = (Y + 1) & 0xFF
+			_update_zero(Y)
+			_update_negative(Y)
 		0xC9:
 			pass
-		0xCA:
-			pass
+		0xCA: # DEX, implied
+			X = (X - 1) & 0xFF
+			_update_zero(X)
+			_update_negative(X)
 		0xCC:
 			pass
 		0xCD:
@@ -404,8 +434,10 @@ func execute(force = false, new_PC = -1):
 			pass
 		0xE6:
 			pass
-		0xE8:
-			pass
+		0xE8: # INX, implied
+			X = (X + 1) & 0xFF
+			_update_zero(X)
+			_update_negative(X)
 		0xE9:
 			pass
 		0xEA:

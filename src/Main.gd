@@ -82,9 +82,7 @@ func assemble_code():
 	$UI/MainPanel/TabContainer.current_tab = 0
 	return success
 
-func run_cpu(status: int = -1, force = false):
-	if status != -1:
-		$CPU.set_status(status)
+func run_cpu(force = false):
 	$CPU.execute(force)
 	update_register_label()
 
@@ -106,11 +104,11 @@ func open_rom(path: String):
 	var success = assemble_code()
 	if success == OK:
 		$CPU.reset($CPU.status.RUNNING)
-		run_cpu($CPU.get_status())
+		run_cpu()
 
 func enable_emulation(enabled: bool):
 	if enabled:
-		$CPU.load_bytes(asm.assembled)
+		$CPU.load_rom(asm.assembled)
 	$UI.emulator_menu.set_item_disabled(EMULATOR_START, !enabled)
 	$UI.emulator_menu.set_item_disabled(EMULATOR_PAUSE, !enabled)
 	$UI.emulator_menu.set_item_disabled(EMULATOR_STOP, !enabled)
@@ -143,7 +141,8 @@ func _on_ui_emulator_item_selected(id: int):
 				$CPU.set_status(CPU.status.RUNNING)
 		EMULATOR_STEP_FORWARD:
 			logger.write_line("Stepping forward")
-			run_cpu(true, true)
+			$CPU.set_status(CPU.status.PAUSED)
+			run_cpu(true)
 		EMULATOR_STEP_BACK:
 			logger.write_line("Stepping back")
 		EMULATOR_STOP:
@@ -168,7 +167,6 @@ func _on_ui_help_item_selected(id: int):
 func _on_CPU_status_changed(new_status: CPU.status, old_status: int) -> void:
 	update_register_label()
 	if logger == null:
-		print("logger is nil, skipping")
 		return
 	match new_status:
 		CPU.status.STOPPED:
