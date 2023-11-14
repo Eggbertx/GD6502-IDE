@@ -8,11 +8,11 @@ A (currently) bare-bones, stripped down 6502 emulator and assembler. Currently, 
 
 
 ## Tests
-There are unit tests in `./tests/` that can be executed using [Gut](https://github.com/bitwes/Gut). To use it, run `godot --debug-collisions -gexit --path $PWD -d -s addons/gut/gut_cmdln.gd`
+There are unit tests in [./test](./test/) that can be executed using [gdUnit4](https://mikeschulze.github.io/gdUnit4/). Running this from the command line generates a report, which can be found in a subdirectory of ./reports/
 
-`-gexit` is optional here, and will cause GUT to exit after all the tests are complete. As an alternative, you can use `-gexit_on_success` which will cause it to only exit if all of the unit tests succeed.
+To use it, run `godot --path . -d -s ./addons/gdUnit4/bin/GdUnitCmdTool.gd --add ./test/`
 
-See https://github.com/bitwes/Gut/wiki/Command-Line for more info on Gut unit tests from the command line.
+For more command line usage info run the above, replacing `-add ./test/` with `-help` or `--help-advanced`, or see the [tutorial](https://mikeschulze.github.io/gdUnit4/advanced_testing/cmd/).
 
 
 ## Used assets
