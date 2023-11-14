@@ -300,8 +300,10 @@ func execute(force = false, new_PC = -1):
 			pass
 		0x7E:
 			pass
-		0x81:
-			pass
+		0x81: # STA, indexed indirect
+			var zp = (pop_byte() + X) % 0xFF
+			var addr = memory[zp] + (memory[zp] << 8) & 0xFF
+			memory[addr] = A
 		0x84:
 			pass
 		0x85: # STA, zero page
@@ -329,20 +331,21 @@ func execute(force = false, new_PC = -1):
 			pass
 		0x94:
 			pass
-		0x95:
-			pass
+		0x95: # STA, zero page, x
+			var zp = (pop_byte() + X) % 0xFF
+			memory[zp] = X
 		0x96:
 			pass
 		0x98: # TYA, implied
 			A = Y
 			_update_zero(A)
 			_update_negative(A)
-		0x99:
-			pass
+		0x99: # STA, absolute, y
+			memory[pop_word() + Y] = A
 		0x9A:
 			pass
-		0x9D:
-			pass
+		0x9D: # STA, absolute,  x
+			memory[pop_word() + X] = A
 		0xA0: # LDY, immediate
 			Y = pop_byte()
 			_update_zero(Y)
