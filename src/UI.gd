@@ -18,6 +18,7 @@ const register_label_format = "A: $%02X    X: $%02X    Y: $%02X    PC: $%04X    
 var loaded_file = ""
 
 func _ready():
+	get_viewport().gui_embed_subwindows = false
 	file_menu.connect("id_pressed", file_menu_selected)
 	emulator_menu.connect("id_pressed", emulator_menu_selected)
 	help_menu.connect("id_pressed", help_menu_selected)

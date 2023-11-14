@@ -129,35 +129,46 @@ func execute(force = false, new_PC = -1):
 
 	opcode = pop_byte()
 	match opcode:
-		0x00: # BRK
+		0x00: # BRK, implied
 			set_status(status.STOPPED, true)
 			set_flag(flag_bit.BREAK, true)
 		0x01:
 			pass
-		0x05:
-			pass
+		0x05: # ORA, zero page
+			var zp = pop_byte()
+			A |= memory[zp]
+			_update_negative(A)
+			_update_zero(A)
 		0x06:
 			pass
 		0x08:
 			pass
-		0x09:
-			pass
+		0x09: # ORA, immediate
+			var num = pop_byte()
+			A |= num
+			_update_negative(A)
+			_update_zero(A)
 		0x0A:
 			pass
-		0x0D:
-			pass
+		0x0D: # ORA, absolute
+			A |= memory[pop_word()]
+			_update_negative(A)
+			_update_zero(A)
 		0x0E:
 			pass
 		0x10:
 			pass
 		0x11:
 			pass
-		0x15:
-			pass
+		0x15: # ORA, zero page, x
+			var zp = (pop_byte() + X) % 0xFF
+			A |= memory[zp]
+			_update_negative(A)
+			_update_zero(A)
 		0x16:
 			pass
-		0x18:
-			pass
+		0x18: #$ CLC, implied
+			set_flag(flag_bit.CARRY, false)
 		0x19:
 			pass
 		0x1D:
@@ -170,14 +181,20 @@ func execute(force = false, new_PC = -1):
 			pass
 		0x24:
 			pass
-		0x25:
-			pass
+		0x25: # AND, zero page
+			var num = memory[pop_byte()]
+			A &= num
+			_update_negative(A)
+			_update_zero(A)
 		0x26:
 			pass
 		0x28:
 			pass
-		0x29:
-			pass
+		0x29: # AND, immediate
+			var imm = pop_byte()
+			A &= imm
+			_update_negative(A)
+			_update_zero(A)
 		0x2A:
 			pass
 		0x2A:
@@ -192,12 +209,15 @@ func execute(force = false, new_PC = -1):
 			pass
 		0x31:
 			pass
-		0x35:
-			pass
+		0x35: # AND, zero page, x
+			var zp = (pop_byte() + X) % 0xFF
+			A &= memory[zp]
+			_update_negative(A)
+			_update_zero(A)
 		0x36:
 			pass
-		0x38:
-			pass
+		0x38: # SEC, implied
+			set_flag(flag_bit.CARRY, true)
 		0x39:
 			pass
 		0x3D:
@@ -234,8 +254,8 @@ func execute(force = false, new_PC = -1):
 			pass
 		0x56:
 			pass
-		0x58:
-			pass
+		0x58: # CLI, implied
+			set_flag(flag_bit.INTERRUPT, false)
 		0x59:
 			pass
 		0x5D:
@@ -272,8 +292,8 @@ func execute(force = false, new_PC = -1):
 			pass
 		0x76:
 			pass
-		0x78:
-			pass
+		0x78: # SEI, implied
+			set_flag(flag_bit.INTERRUPT, true)
 		0x79:
 			pass
 		0x7D:
@@ -327,18 +347,28 @@ func execute(force = false, new_PC = -1):
 			Y = pop_byte()
 			_update_zero(Y)
 			_update_negative(Y)
-		0xA1:
-			pass
+		0xA1: # LDA, indexed indirect
+			var zp = (pop_byte() + X) % 0xFF
+			var addr = memory[zp] + (memory[zp] << 8) & 0xFF
+			A = memory[addr]
+			_update_zero(A)
+			_update_negative(A)
 		0xA2: # LDX, immediate
 			X = pop_byte()
 			_update_zero(X)
 			_update_negative(X)
-		0xA4:
-			pass
-		0xA5:
-			pass
-		0xA6:
-			pass
+		0xA4: # LDY, zero page
+			Y = memory[pop_byte()]
+			_update_zero(Y)
+			_update_negative(Y)
+		0xA5: # LDA, zero page
+			A = memory[pop_byte()]
+			_update_zero(A)
+			_update_negative(A)
+		0xA6: # LDX, zero page
+			X = memory[pop_byte()]
+			_update_zero(X)
+			_update_negative(X)
 		0xA8: # TAY, implied
 			Y = A
 			_update_zero(Y)
@@ -351,34 +381,57 @@ func execute(force = false, new_PC = -1):
 			X = A
 			_update_zero(X)
 			_update_negative(X)
-		0xAC:
-			pass
-		0xAD:
-			pass
-		0xAE:
-			pass
+		0xAC: # LDY, absolute
+			Y = memory[pop_word()]
+			_update_zero(Y)
+			_update_negative(Y)
+		0xAD: # LDA, absolute
+			A = memory[pop_word()]
+			_update_zero(A)
+			_update_negative(A)
+		0xAE: # LDX, absolute
+			X = memory[pop_word()]
+			_update_zero(X)
+			_update_negative(X)
 		0xB0:
 			pass
-		0xB1:
+		0xB1: # LDA, 
 			pass
-		0xB4:
-			pass
-		0xB5:
-			pass
-		0xB6:
-			pass
-		0xB8:
-			pass
-		0xB9:
-			pass
+		0xB4: # LDY, zero page, x
+			var zp = (pop_byte() + X) % 0xFF
+			Y = memory[zp]
+			_update_zero(Y)
+			_update_negative(Y)
+		0xB5: # LDA, zero page, x
+			var zp = (pop_byte() + X) % 0xFF
+			A = memory[zp]
+			_update_zero(A)
+			_update_negative(A)
+		0xB6: # LDX, zero page, y
+			var zp = (pop_byte() + Y) % 0xFF
+			X = memory[zp]
+			_update_zero(X)
+			_update_negative(X)
+		0xB8: # CLV, implied
+			set_flag(flag_bit.OVERFLOW, false)
+		0xB9: # LDA, absolute, y
+			A = memory[pop_word() + Y]
+			_update_zero(A)
+			_update_negative(A)
 		0xBA:
 			pass
-		0xBC:
-			pass
-		0xBD:
-			pass
-		0xBE:
-			pass
+		0xBC: # LDY, absolute, x
+			Y = memory[pop_word() + X]
+			_update_zero(Y)
+			_update_negative(Y)
+		0xBD: # LDA, absolute, x
+			A = memory[pop_word() + X]
+			_update_zero(A)
+			_update_negative(A)
+		0xBE: # LDX, absolute, y
+			X = memory[pop_word()]
+			_update_zero(Y)
+			_update_negative(Y)
 		0xC0:
 			pass
 		0xC1:
@@ -416,8 +469,8 @@ func execute(force = false, new_PC = -1):
 			pass
 		0xD6:
 			pass
-		0xD8:
-			pass
+		0xD8: # CLD
+			set_flag(flag_bit.BCD, false)
 		0xD9:
 			pass
 		0xDD:
