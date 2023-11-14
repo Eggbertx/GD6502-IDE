@@ -16,5 +16,5 @@ See https://github.com/bitwes/Gut/wiki/Command-Line for more info on Gut unit te
 
 
 ## Used assets
-* The Godot logo in GD6502's icon is owned by the developers of the [Godot game engine](https://godotengine.org/) and licensed under the [Creative Commons Attribution 3.0 Unported](https://github.com/godotengine/godot/blob/master/LOGO_LICENSE.md) license.
+* The Godot logo in GD6502's icon is owned by the developers of the [Godot game engine](https://godotengine.org/) and licensed under the [Creative Commons Attribution 4.0 International](https://github.com/godotengine/godot/blob/master/LOGO_LICENSE.txt) license.
 * The Noto Sans Monospace font (used for the assembly editor and status log) is developed by the Noto Fonts Project, and is licensed under the [SIL Open Fonts License](https://github.com/notofonts/noto-fonts/blob/main/LICENSE).
