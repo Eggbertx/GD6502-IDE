@@ -33,11 +33,17 @@ var Y := 0
 var PC := PC_START
 var SP := 0
 var _status := status.STOPPED
-var memory := []
+var memory := PackedByteArray()
 var memory_size := 0
+var _init_ram_size := 0
 var opcode := 0
 var flags := 0
 var logger: Node
+
+func _init(memsize = RAM_END):
+	memory_size = memsize
+	_init_ram_size = memsize
+	memory.resize(memory_size)
 
 func _ready():
 	reset()
@@ -72,8 +78,8 @@ func load_rom(bytes:PackedByteArray):
 	rom_loaded.emit(bytes.size())
 
 func unload_rom():
-	memory.resize(PC_START)
-	memory_size = PC_START
+	memory.resize(_init_ram_size)
+	memory_size = _init_ram_size
 	for b in range(memory_size):
 		memory[b] = 0
 	rom_unloaded.emit()
@@ -302,7 +308,7 @@ func execute(force = false, new_PC = -1):
 			pass
 		0x81: # STA, indexed indirect
 			var zp = (pop_byte() + X) % 0xFF
-			var addr = memory[zp] + (memory[zp] << 8) & 0xFF
+			var addr = memory[zp] + (memory[zp+1] << 8)
 			memory[addr] = A
 		0x84:
 			pass
@@ -321,19 +327,21 @@ func execute(force = false, new_PC = -1):
 			_update_zero(A)
 		0x8C:
 			pass
-		0x8D:
-			pass
+		0x8D: # STA, absolute
+			memory[pop_word()] = A
 		0x8E:
 			pass
 		0x90:
 			pass
-		0x91:
-			pass
+		0x91: # STA, indirect indexed
+			var zp = pop_byte()
+			var addr = memory[zp] + (memory[zp+1] << 8)
+			memory[addr+Y] = A
 		0x94:
 			pass
 		0x95: # STA, zero page, x
 			var zp = (pop_byte() + X) % 0xFF
-			memory[zp] = X
+			memory[zp] = A
 		0x96:
 			pass
 		0x98: # TYA, implied
@@ -520,3 +528,8 @@ func execute(force = false, new_PC = -1):
 			pass
 		0xFE:
 			pass
+
+func step(steps:int = 1):
+	_status = status.PAUSED
+	for s in range(steps):
+		execute(true)
