@@ -98,7 +98,7 @@ func reset(reset_status:status = _status):
 	cpu_reset.emit()
 
 # basic memory operations
-func pop_byte():
+func pop_byte() -> int:
 	if PC >= memory.size():
 		return 0
 	var popped = memory[PC] & 0xFF
@@ -307,16 +307,17 @@ func execute(force = false, new_PC = -1):
 		0x7E:
 			pass
 		0x81: # STA, indexed indirect
-			var zp = (pop_byte() + X) % 0xFF
-			var addr = memory[zp] + (memory[zp+1] << 8)
+			var zp := (pop_byte() + X) % 0xFF
+			var addr := memory[zp] + (memory[zp+1] << 8)
 			memory[addr] = A
 		0x84:
 			pass
 		0x85: # STA, zero page
 			var zp = pop_byte()
 			memory[zp] = A
-		0x86:
-			pass
+		0x86: # STX, zero page
+			var zp := pop_byte() % 0xFF
+			memory[zp] = X
 		0x88: # DEY, implied
 			Y = (Y - 1) & 0xFF
 			_update_negative(Y)
@@ -329,8 +330,8 @@ func execute(force = false, new_PC = -1):
 			pass
 		0x8D: # STA, absolute
 			memory[pop_word()] = A
-		0x8E:
-			pass
+		0x8E: # STX, absolute
+			memory[pop_word()] = X
 		0x90:
 			pass
 		0x91: # STA, indirect indexed
@@ -342,8 +343,9 @@ func execute(force = false, new_PC = -1):
 		0x95: # STA, zero page, x
 			var zp = (pop_byte() + X) % 0xFF
 			memory[zp] = A
-		0x96:
-			pass
+		0x96: # STX, zero page, y
+			var zp := (pop_byte() + Y) % 0xFF
+			memory[zp] = X
 		0x98: # TYA, implied
 			A = Y
 			_update_zero(A)

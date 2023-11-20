@@ -1,3 +1,5 @@
+# Testing STA, STX, and STY instructions
+
 class_name STAXYTest
 extends GdUnitTestSuite
 @warning_ignore('unused_parameter')
@@ -7,6 +9,10 @@ var lda_assembled = PackedByteArray([
 	0xa9, 0xab, 0xa2, 0x01, 0xa0, 0x02, 0x85, 0x01, 0x95, 0x01, 0x8d, 0x23, 0x01, 0x9d, 0x23, 0x01, 
 	0x99, 0x23, 0x01, 0xa9, 0x01, 0x85, 0x03, 0x85, 0x04, 0x81, 0x02, 0xa9, 0x05, 0x85, 0x04, 0xa9, 
 	0xfd, 0x85, 0x03, 0x91, 0x03
+])
+
+var sta_assembled = PackedByteArray([
+	0xa2, 0x01, 0xa0, 0x02, 0x86, 0x04, 0x96, 0x05, 0x8e, 0x23, 0x01 
 ])
 
 var cpu := CPU.new()
@@ -65,3 +71,22 @@ sta ($03),y ; indirect indexed
 	assert_int(cpu.memory[0x0101]).is_equal(0x01)
 	cpu.step(5)
 	assert_int(cpu.memory[0x05ff]).is_equal(0xfd)
+
+func test_stx():
+	asm.asm_str = """
+ldx #$01
+ldy #$02
+stx $04
+stx $05,y
+stx $0123
+"""
+	assert_int(asm.assemble()).is_equal(OK)
+	assert_int(asm.assembled.size()).is_equal(sta_assembled.size())
+	assert_array(asm.assembled).is_equal(sta_assembled)
+	cpu.load_rom(asm.assembled)
+	cpu.step(5)
+	assert_int(cpu.X).is_equal(0x01)
+	assert_int(cpu.Y).is_equal(0x02)
+	assert_int(cpu.memory[0x04]).is_equal(0x01)
+	assert_int(cpu.memory[0x07]).is_equal(0x01)
+	assert_int(cpu.memory[0x0123]).is_equal(0x01)
