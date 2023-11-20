@@ -310,8 +310,9 @@ func execute(force = false, new_PC = -1):
 			var zp := (pop_byte() + X) % 0xFF
 			var addr := memory[zp] + (memory[zp+1] << 8)
 			memory[addr] = A
-		0x84:
-			pass
+		0x84: # STY, zero page
+			var zp = pop_byte()
+			memory[zp] = Y
 		0x85: # STA, zero page
 			var zp = pop_byte()
 			memory[zp] = A
@@ -326,8 +327,8 @@ func execute(force = false, new_PC = -1):
 			A = X
 			_update_negative(A)
 			_update_zero(A)
-		0x8C:
-			pass
+		0x8C: # STY, absolute
+			memory[pop_word()] = Y
 		0x8D: # STA, absolute
 			memory[pop_word()] = A
 		0x8E: # STX, absolute
@@ -338,8 +339,9 @@ func execute(force = false, new_PC = -1):
 			var zp = pop_byte()
 			var addr = memory[zp] + (memory[zp+1] << 8)
 			memory[addr+Y] = A
-		0x94:
-			pass
+		0x94: # STY, zero page, x
+			var zp = (pop_byte() + X) % 0xFF
+			memory[zp] = Y
 		0x95: # STA, zero page, x
 			var zp = (pop_byte() + X) % 0xFF
 			memory[zp] = A

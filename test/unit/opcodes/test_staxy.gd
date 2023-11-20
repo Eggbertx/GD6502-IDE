@@ -15,6 +15,10 @@ var stx_assembled = PackedByteArray([
 	0xa2, 0x01, 0xa0, 0x02, 0x86, 0x04, 0x96, 0x05, 0x8e, 0x23, 0x01 
 ])
 
+var sty_assembled = PackedByteArray([
+	0xa0, 0x01, 0xa2, 0x02, 0x84, 0x04, 0x94, 0x05, 0x8c, 0x23, 0x01 
+])
+
 var cpu := CPU.new()
 var asm := Assembler.new()
 
@@ -87,6 +91,25 @@ stx $0123
 	cpu.step(5)
 	assert_int(cpu.X).is_equal(0x01)
 	assert_int(cpu.Y).is_equal(0x02)
+	assert_int(cpu.memory[0x04]).is_equal(0x01)
+	assert_int(cpu.memory[0x07]).is_equal(0x01)
+	assert_int(cpu.memory[0x0123]).is_equal(0x01)
+
+func test_sty():
+	asm.asm_str = """
+ldy #$01
+ldx #$02
+sty $04
+sty $05,x
+sty $0123
+"""
+	assert_int(asm.assemble()).is_equal(OK)
+	assert_int(asm.assembled.size()).is_equal(sty_assembled.size())
+	assert_array(asm.assembled).is_equal(sty_assembled)
+	cpu.load_rom(asm.assembled)
+	cpu.step(5)
+	assert_int(cpu.Y).is_equal(0x01)
+	assert_int(cpu.X).is_equal(0x02)
 	assert_int(cpu.memory[0x04]).is_equal(0x01)
 	assert_int(cpu.memory[0x07]).is_equal(0x01)
 	assert_int(cpu.memory[0x0123]).is_equal(0x01)
