@@ -5,13 +5,13 @@ extends GdUnitTestSuite
 @warning_ignore('unused_parameter')
 @warning_ignore('return_value_discarded')
 
-var lda_assembled = PackedByteArray([
+var sta_assembled = PackedByteArray([
 	0xa9, 0xab, 0xa2, 0x01, 0xa0, 0x02, 0x85, 0x01, 0x95, 0x01, 0x8d, 0x23, 0x01, 0x9d, 0x23, 0x01, 
 	0x99, 0x23, 0x01, 0xa9, 0x01, 0x85, 0x03, 0x85, 0x04, 0x81, 0x02, 0xa9, 0x05, 0x85, 0x04, 0xa9, 
 	0xfd, 0x85, 0x03, 0x91, 0x03
 ])
 
-var sta_assembled = PackedByteArray([
+var stx_assembled = PackedByteArray([
 	0xa2, 0x01, 0xa0, 0x02, 0x86, 0x04, 0x96, 0x05, 0x8e, 0x23, 0x01 
 ])
 
@@ -47,8 +47,8 @@ sta $03
 sta ($03),y ; indirect indexed
 """
 	assert_int(asm.assemble()).is_equal(OK)
-	assert_int(asm.assembled.size()).is_equal(lda_assembled.size())
-	assert_array(asm.assembled).is_equal(lda_assembled)
+	assert_int(asm.assembled.size()).is_equal(sta_assembled.size())
+	assert_array(asm.assembled).is_equal(sta_assembled)
 	cpu.load_rom(asm.assembled)
 	cpu.step(3)
 	assert_int(cpu.A).is_equal(0xab)
@@ -81,8 +81,8 @@ stx $05,y
 stx $0123
 """
 	assert_int(asm.assemble()).is_equal(OK)
-	assert_int(asm.assembled.size()).is_equal(sta_assembled.size())
-	assert_array(asm.assembled).is_equal(sta_assembled)
+	assert_int(asm.assembled.size()).is_equal(stx_assembled.size())
+	assert_array(asm.assembled).is_equal(stx_assembled)
 	cpu.load_rom(asm.assembled)
 	cpu.step(5)
 	assert_int(cpu.X).is_equal(0x01)
