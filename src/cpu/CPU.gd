@@ -117,6 +117,9 @@ func push_word(byte:int):
 	push_byte(byte & 0xFF)
 	push_byte((byte >> 8) & 0xFF)
 
+func get_word(pos:int):
+	return memory[pos&0xFF] + (memory[(pos+1)&0xFF] << 8)
+
 func _update_zero(register: int):
 	set_flag(flag_bit.ZERO, register == 0)
 
@@ -308,7 +311,7 @@ func execute(force = false, new_PC = -1):
 			pass
 		0x81: # STA, indexed indirect
 			var zp := (pop_byte() + X) % 0xFF
-			var addr := memory[zp] + (memory[zp+1] << 8)
+			var addr = get_word(zp)
 			memory[addr] = A
 		0x84: # STY, zero page
 			var zp = pop_byte()
@@ -337,7 +340,7 @@ func execute(force = false, new_PC = -1):
 			pass
 		0x91: # STA, indirect indexed
 			var zp = pop_byte()
-			var addr = memory[zp] + (memory[zp+1] << 8)
+			var addr = get_word(zp)
 			memory[addr+Y] = A
 		0x94: # STY, zero page, x
 			var zp = (pop_byte() + X) % 0xFF
@@ -364,7 +367,7 @@ func execute(force = false, new_PC = -1):
 			_update_negative(Y)
 		0xA1: # LDA, indexed indirect
 			var zp = (pop_byte() + X) % 0xFF
-			var addr = memory[zp] + (memory[zp] << 8) & 0xFF
+			var addr = get_word(zp)
 			A = memory[addr]
 			_update_zero(A)
 			_update_negative(A)
