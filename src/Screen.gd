@@ -1,5 +1,7 @@
 extends Sprite2D
 
+class_name Screen
+
 const palette = [
 	Color("#000000"), Color("#ffffff"), Color("#880000"), Color("#aaffee"),
 	Color("#cc44cc"), Color("#00cc55"), Color("#0000aa"), Color("#eeee77"),
@@ -30,7 +32,13 @@ func _draw():
 
 func set_pixel_col(index:int, color:int):
 	if pixels.size() > index:
-		pixels[index] = palette[color]
+		pixels[index] = palette[color & 0x0f]
+		queue_redraw()
+
+func clear():
+	for _p in range(num_pixels):
+		pixels[_p] = palette[0]
+	queue_redraw()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:

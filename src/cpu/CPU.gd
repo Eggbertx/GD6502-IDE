@@ -6,6 +6,7 @@ signal status_changed
 signal cpu_reset
 signal rom_loaded
 signal rom_unloaded
+signal watched_memory_changed(location:int, new_val:int)
 
 # status register bits
 enum flag_bit {
@@ -39,6 +40,7 @@ var _init_ram_size := 0
 var opcode := 0
 var flags := 0
 var logger: Node
+var watched_ranges := [] # each element: [start,end]
 
 func _init(memsize = RAM_END):
 	memory_size = memsize
@@ -119,6 +121,14 @@ func push_word(byte:int):
 
 func get_word(pos:int):
 	return memory[pos&0xFF] + (memory[(pos+1)&0xFF] << 8)
+
+func set_byte(addr:int, value:int):
+	if addr >= memory_size:
+		return
+	memory[addr] = value
+	for watched in watched_ranges:
+		if addr >= watched[0] and addr <= watched[1]:
+			watched_memory_changed.emit(addr, value)
 
 func _update_zero(register: int):
 	set_flag(flag_bit.ZERO, register == 0)
@@ -312,16 +322,16 @@ func execute(force = false, new_PC = -1):
 		0x81: # STA, indexed indirect
 			var zp := (pop_byte() + X) % 0xFF
 			var addr = get_word(zp)
-			memory[addr] = A
+			set_byte(addr, A)
 		0x84: # STY, zero page
 			var zp = pop_byte()
-			memory[zp] = Y
+			set_byte(zp, Y)
 		0x85: # STA, zero page
 			var zp = pop_byte()
-			memory[zp] = A
+			set_byte(zp, A)
 		0x86: # STX, zero page
 			var zp := pop_byte() % 0xFF
-			memory[zp] = X
+			set_byte(zp, X)
 		0x88: # DEY, implied
 			Y = (Y - 1) & 0xFF
 			_update_negative(Y)
@@ -331,36 +341,36 @@ func execute(force = false, new_PC = -1):
 			_update_negative(A)
 			_update_zero(A)
 		0x8C: # STY, absolute
-			memory[pop_word()] = Y
+			set_byte(pop_word(), Y)
 		0x8D: # STA, absolute
-			memory[pop_word()] = A
+			set_byte(pop_word(), A)
 		0x8E: # STX, absolute
-			memory[pop_word()] = X
+			set_byte(pop_word(), X)
 		0x90:
 			pass
 		0x91: # STA, indirect indexed
 			var zp = pop_byte()
 			var addr = get_word(zp)
-			memory[addr+Y] = A
+			set_byte(addr+Y, A)
 		0x94: # STY, zero page, x
 			var zp = (pop_byte() + X) % 0xFF
-			memory[zp] = Y
+			set_byte(zp, Y)
 		0x95: # STA, zero page, x
 			var zp = (pop_byte() + X) % 0xFF
-			memory[zp] = A
+			set_byte(zp, A)
 		0x96: # STX, zero page, y
 			var zp := (pop_byte() + Y) % 0xFF
-			memory[zp] = X
+			set_byte(zp, X)
 		0x98: # TYA, implied
 			A = Y
 			_update_zero(A)
 			_update_negative(A)
 		0x99: # STA, absolute, y
-			memory[pop_word() + Y] = A
+			set_byte(pop_word() + Y, A)
 		0x9A:
 			pass
 		0x9D: # STA, absolute,  x
-			memory[pop_word() + X] = A
+			set_byte(pop_word() + X, A)
 		0xA0: # LDY, immediate
 			Y = pop_byte()
 			_update_zero(Y)
@@ -464,7 +474,7 @@ func execute(force = false, new_PC = -1):
 			pass
 		0xC6: #DEC, zero page
 			var zp = pop_byte()
-			memory[zp] = (memory[zp] - 1) & 0xFF
+			set_byte(memory[zp], (memory[zp] - 1) & 0xFF)
 			_update_zero(memory[zp])
 			_update_negative(memory[zp])
 		0xC8: # INY, implied

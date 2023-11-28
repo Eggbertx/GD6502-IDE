@@ -31,11 +31,13 @@ enum {
 const REPO_URL = "https://github.com/Eggbertx/GD6502"
 const SETTINGS_PATH = "user://settings.save"
 @onready var logger:TextEdit = $UI/MainPanel/TabContainer/Status
+@onready var screen:Screen = $UI/MainPanel/Screen
 var asm: Assembler
 
 func _ready():
 	load_settings()
 	$CPU.set_logger(logger)
+	$CPU.watched_ranges.append([0x200, 0x5ff])
 	asm = Assembler.new()
 	asm.set_logger(logger)
 	asm.set_hexdump_logger($UI/MainPanel/TabContainer/Hexdump)
@@ -80,6 +82,7 @@ func assemble_code():
 	asm.update_hexdump()
 	$CPU.reset()
 	$UI/MainPanel/TabContainer.current_tab = 0
+	screen.clear()
 	return success
 
 func run_cpu(force = false):
@@ -192,3 +195,7 @@ func _on_clock_timer_timeout():
 
 func _on_cpu_cpu_reset():
 	update_register_label()
+
+func _on_cpu_watched_memory_changed(location:int, new_val:int):
+	if location >= 0x200 and location <= 0x5ff:
+		screen.set_pixel_col(location-0x200, new_val & 0xf)

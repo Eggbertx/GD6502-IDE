@@ -19,4 +19,5 @@ script = ExtResource("1")
 [connection signal="help_item_selected" from="UI" to="." method="_on_ui_help_item_selected"]
 [connection signal="cpu_reset" from="CPU" to="." method="_on_cpu_cpu_reset"]
 [connection signal="status_changed" from="CPU" to="." method="_on_CPU_status_changed"]
+[connection signal="watched_memory_changed" from="CPU" to="." method="_on_cpu_watched_memory_changed"]
 [connection signal="timeout" from="ClockTimer" to="." method="_on_clock_timer_timeout"]
