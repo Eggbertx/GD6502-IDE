@@ -413,8 +413,12 @@ func execute(force = false, new_PC = -1):
 			_update_negative(X)
 		0xB0:
 			pass
-		0xB1: # LDA, 
-			pass
+		0xB1: # LDA, indirect indexed
+			var zp = pop_byte()
+			var addr = get_word(zp)
+			A = memory[addr+Y]
+			_update_zero(A)
+			_update_negative(A)
 		0xB4: # LDY, zero page, x
 			var zp = (pop_byte() + X) % 0xFF
 			Y = memory[zp]
