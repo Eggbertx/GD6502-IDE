@@ -1,9 +1,40 @@
 extends Control
 
-signal file_selected
-signal file_item_selected
-signal emulator_item_selected
-signal help_item_selected
+class_name UI
+
+enum {
+	FILE_OPEN_FILE,
+	FILE_OPEN_EXAMPLE,
+	FILE_SEPARATOR1,
+	FILE_SAVE,
+	FILE_SAVE_AS,
+	FILE_SEPARATOR2,
+	FILE_EXIT,
+}
+enum {
+	EMULATOR_ASSEMBLE,
+	EMULATOR_START,
+	EMULATOR_PAUSED,
+	EMULATOR_RESET,
+	EMULATOR_STOP,
+	EMULATOR_SEPARATOR1,
+	EMULATOR_STEP_FORWARD,
+	EMULATOR_STEP_BACK,
+	EMULATOR_GOTO,
+	EMULATOR_SEPARATOR2,
+	EMULATOR_CLEAR_LOG
+}
+enum {
+	HELP_REPO,
+	HELP_6502ORG,
+	HELP_WP_6502,
+	HELP_EASY6502
+}
+
+signal file_selected(path:String)
+signal file_item_selected(id:int)
+signal emulator_item_selected(id:int)
+signal help_item_selected(id:int)
 
 const pixel_scale = 8
 const screen_size = 32
@@ -19,6 +50,7 @@ const register_label_format = "A: $%02X    X: $%02X    Y: $%02X    PC: $%04X    
 var loaded_file = ""
 
 func _ready():
+	init_menus()
 	get_viewport().gui_embed_subwindows = false
 	file_menu.connect("id_pressed", file_menu_selected)
 	emulator_menu.connect("id_pressed", emulator_menu_selected)
@@ -31,6 +63,31 @@ func init_syntax_highlighting():
 		highlighter.keyword_colors[opcode] = Color.CYAN
 		highlighter.keyword_colors[opcode.to_lower()] = Color.CYAN
 
+func init_menus():
+	file_menu.add_item("Open File")
+	file_menu.add_item("Open Example")
+	file_menu.add_separator()
+	file_menu.add_item("Save")
+	file_menu.add_item("Save As")
+	file_menu.add_separator()
+	file_menu.add_item("Exit")
+	emulator_menu.add_item("Assemble")
+	emulator_menu.add_item("Start")
+	emulator_menu.add_check_item("Paused")
+	emulator_menu.add_item("Reset")
+	emulator_menu.add_item("Stop")
+	emulator_menu.add_separator()
+	emulator_menu.add_item("Step Forward")
+	emulator_menu.add_item("Step Back")
+	emulator_menu.add_item("Go To Address")
+	emulator_menu.add_separator()
+	emulator_menu.add_item("Clear Log")
+	help_menu.add_item("GD6502 on GitHub")
+	help_menu.add_item("6502.org")
+	help_menu.add_item("MOS 6502 Wikipedia")
+	help_menu.add_item("Easy 6502")
+	for i in range(1,9):
+		emulator_menu.set_item_disabled(i, true)
 
 func pixel_size():
 	return get_viewport().size.x / screen_size

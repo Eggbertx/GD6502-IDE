@@ -1,37 +1,10 @@
 extends Node
 
-enum {
-	FILE_OPEN_FILE,
-	FILE_OPEN_EXAMPLE,
-	FILE_SEPARATOR1,
-	FILE_SAVE,
-	FILE_SAVE_AS,
-	FILE_SEPARATOR2,
-	FILE_EXIT,
-}
-enum {
-	EMULATOR_ASSEMBLE,
-	EMULATOR_START,
-	EMULATOR_PAUSE,
-	EMULATOR_STOP,
-	EMULATOR_SEPARATOR1,
-	EMULATOR_STEP_FORWARD,
-	EMULATOR_STEP_BACK,
-	EMULATOR_GOTO,
-	EMULATOR_SEPARATOR2,
-	EMULATOR_CLEAR_LOG
-}
-enum {
-	HELP_REPO,
-	HELP_6502ORG,
-	HELP_WP_6502,
-	HELP_EASY6502
-}
-
 const REPO_URL = "https://github.com/Eggbertx/GD6502"
 const SETTINGS_PATH = "user://settings.save"
 @onready var logger:TextEdit = $UI/MainPanel/TabContainer/Status
 @onready var screen:Screen = $UI/MainPanel/Screen
+@onready var ui:UI = $UI
 var asm: Assembler
 var executions_per_physics_process := 91
 # var max_wait_time := 1.0/60.0
@@ -57,7 +30,7 @@ func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST or what == NOTIFICATION_EXIT_TREE:
 		save_settings()
 
-func _physics_process(delta):
+func _physics_process(_delta):
 	if $CPU.get_status() != CPU.status.RUNNING:
 		return
 	for i in range(executions_per_physics_process):
@@ -121,57 +94,60 @@ func open_rom(path: String):
 func enable_emulation(enabled: bool):
 	if enabled:
 		$CPU.load_rom(asm.assembled)
-	$UI.emulator_menu.set_item_disabled(EMULATOR_START, !enabled)
-	$UI.emulator_menu.set_item_disabled(EMULATOR_PAUSE, !enabled)
-	$UI.emulator_menu.set_item_disabled(EMULATOR_STOP, !enabled)
-	$UI.emulator_menu.set_item_disabled(EMULATOR_STEP_FORWARD, !enabled)
-	$UI.emulator_menu.set_item_disabled(EMULATOR_GOTO, !enabled)
+	ui.emulator_menu.set_item_disabled(UI.EMULATOR_START, !enabled)
+	ui.emulator_menu.set_item_disabled(UI.EMULATOR_PAUSED, !enabled)
+	ui.emulator_menu.set_item_disabled(UI.EMULATOR_RESET, !enabled)
+	ui.emulator_menu.set_item_disabled(UI.EMULATOR_STOP, !enabled)
+	ui.emulator_menu.set_item_disabled(UI.EMULATOR_STEP_FORWARD, !enabled)
+	ui.emulator_menu.set_item_disabled(UI.EMULATOR_GOTO, !enabled)
 
 func _on_ui_file_item_selected(id: int):
 	match id:
-		FILE_OPEN_FILE:
+		UI.FILE_OPEN_FILE:
 			$UI.open_file_dialog(false)
-		FILE_OPEN_EXAMPLE:
+		UI.FILE_OPEN_EXAMPLE:
 			$UI.open_file_dialog(true)
-		FILE_EXIT:
+		UI.FILE_EXIT:
 			get_tree().quit(0)
 
 func _on_ui_emulator_item_selected(id: int):
 	match id:
-		EMULATOR_ASSEMBLE:
+		UI.EMULATOR_ASSEMBLE:
 			asm.asm_str = $UI/MainPanel/CodeEdit.text
 			enable_emulation(assemble_code() == OK)
-		EMULATOR_START:
+		UI.EMULATOR_START:
 			$CPU.set_status(CPU.status.RUNNING)
 			run_cpu()
-		EMULATOR_PAUSE:
+		UI.EMULATOR_PAUSED:
 			var status = $CPU.get_status()
 			if status == CPU.status.RUNNING:
+				ui.emulator_menu.set_item_checked(UI.EMULATOR_PAUSED, true)
 				$CPU.set_status(CPU.status.PAUSED)
 			elif status == CPU.status.PAUSED:
 				$CPU.set_status(CPU.status.RUNNING)
-		EMULATOR_STEP_FORWARD:
+				ui.emulator_menu.set_item_checked(UI.EMULATOR_PAUSED, false)
+		UI.EMULATOR_STEP_FORWARD:
 			logger.write_line("Stepping forward")
 			$CPU.set_status(CPU.status.PAUSED)
 			run_cpu(true)
-		EMULATOR_STEP_BACK:
+		UI.EMULATOR_STEP_BACK:
 			logger.write_line("Stepping back")
-		EMULATOR_STOP:
+		UI.EMULATOR_STOP:
 			$CPU.reset(CPU.status.STOPPED)
-		EMULATOR_GOTO:
+		UI.EMULATOR_GOTO:
 			$UI/GoToAddressDialog.show()
-		EMULATOR_CLEAR_LOG:
+		UI.EMULATOR_CLEAR_LOG:
 			$UI/MainPanel/TabContainer/Status.clear()
 
 func _on_ui_help_item_selected(id: int):
 	match id:
-		HELP_REPO:
+		UI.HELP_REPO:
 			OS.shell_open(REPO_URL)
-		HELP_6502ORG:
+		UI.HELP_6502ORG:
 			OS.shell_open("http://www.6502.org/")
-		HELP_WP_6502:
+		UI.HELP_WP_6502:
 			OS.shell_open("https://en.wikipedia.org/wiki/MOS_Technology_6502")
-		HELP_EASY6502:
+		UI.HELP_EASY6502:
 			OS.shell_open("https://skilldrick.github.io/easy6502/")
 
 func _on_CPU_status_changed(new_status: CPU.status, old_status: int) -> void:
@@ -195,6 +171,8 @@ func _on_CPU_status_changed(new_status: CPU.status, old_status: int) -> void:
 
 func _on_cpu_cpu_reset():
 	update_register_label()
+	if screen != null:
+		screen.clear()
 
 func _on_cpu_watched_memory_changed(location:int, new_val:int):
 	if location >= 0x200 and location <= 0x5ff:
