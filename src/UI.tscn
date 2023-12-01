@@ -127,8 +127,14 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Screen" parent="MainPanel" instance=ExtResource("2")]
+texture_filter = 1
+layout_mode = 1
+anchors_preset = 0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_right = 32.0
+offset_bottom = 32.0
 scale = Vector2(8, 8)
-centered = false
 
 [node name="CodeEdit" type="CodeEdit" parent="MainPanel"]
 layout_mode = 1

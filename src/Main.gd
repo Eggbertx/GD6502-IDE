@@ -33,6 +33,8 @@ const SETTINGS_PATH = "user://settings.save"
 @onready var logger:TextEdit = $UI/MainPanel/TabContainer/Status
 @onready var screen:Screen = $UI/MainPanel/Screen
 var asm: Assembler
+var max_wait_time := 1.0/60.0
+var wait_time: float = 0.0
 
 func _ready():
 	load_settings()
@@ -53,6 +55,14 @@ func _input(event):
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST or what == NOTIFICATION_EXIT_TREE:
 		save_settings()
+
+func _physics_process(delta):
+	if $CPU.get_status() != CPU.status.RUNNING:
+		return
+	
+	if wait_time == 0 or wait_time >= max_wait_time:
+		run_cpu()
+		# wait_time += delta
 
 func save_settings():
 	var file := FileAccess.open(SETTINGS_PATH, FileAccess.WRITE)
@@ -134,7 +144,6 @@ func _on_ui_emulator_item_selected(id: int):
 			enable_emulation(assemble_code() == OK)
 		EMULATOR_START:
 			$CPU.set_status(CPU.status.RUNNING)
-			$ClockTimer.start()
 			run_cpu()
 		EMULATOR_PAUSE:
 			var status = $CPU.get_status()
@@ -150,7 +159,6 @@ func _on_ui_emulator_item_selected(id: int):
 			logger.write_line("Stepping back")
 		EMULATOR_STOP:
 			$CPU.reset(CPU.status.STOPPED)
-			$ClockTimer.stop()
 		EMULATOR_GOTO:
 			$UI/GoToAddressDialog.show()
 		EMULATOR_CLEAR_LOG:
@@ -174,24 +182,17 @@ func _on_CPU_status_changed(new_status: CPU.status, old_status: int) -> void:
 	match new_status:
 		CPU.status.STOPPED:
 			logger.write_line("Stopping emulator")
-			$ClockTimer.stop()
 		CPU.status.RUNNING:
 			if old_status == CPU.status.PAUSED:
 				logger.write_line("Unpausing emulator")
 			else:
 				logger.write_line("Starting emulator")
-			$ClockTimer.start()
 		CPU.status.PAUSED:
 			if old_status == CPU.status.RUNNING:
 				logger.write_line("Pausing emulator")
-				$ClockTimer.pause()
 		CPU.status.END:
-			$ClockTimer.stop()
 			logger.write_line("Program end at PC=$%04X" % $CPU.PC)
 
-func _on_clock_timer_timeout():
-	if $CPU.get_status() == CPU.status.RUNNING:
-		run_cpu()
 
 func _on_cpu_cpu_reset():
 	update_register_label()

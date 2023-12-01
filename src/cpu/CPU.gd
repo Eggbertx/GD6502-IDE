@@ -119,6 +119,13 @@ func push_word(byte:int):
 	push_byte(byte & 0xFF)
 	push_byte((byte >> 8) & 0xFF)
 
+func get_byte(addr:int):
+	if addr >= memory_size:
+		return 0
+	elif addr == 0xfe:
+		return randi_range(0, 255)
+	return memory[addr]
+
 func get_word(pos:int):
 	return memory[pos&0xFF] + (memory[(pos+1)&0xFF] << 8)
 
@@ -259,8 +266,8 @@ func execute(force = false, new_PC = -1):
 			pass
 		0x4A:
 			pass
-		0x4C:
-			pass
+		0x4C: # JMP, absolute
+			PC = pop_word()
 		0x4D:
 			pass
 		0x4E:

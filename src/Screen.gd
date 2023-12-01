@@ -1,4 +1,4 @@
-extends Sprite2D
+extends TextureRect
 
 class_name Screen
 
@@ -11,36 +11,26 @@ const palette = [
 
 # 32x32, or 1024
 const num_pixels = 0x400
-var pixel: Rect2
-var pixel_pos: Vector2
-var pixels = []
-var running = true
+var img := Image.create(32, 32, true, Image.FORMAT_RGB8)
+var max_queue_timer := 1.0 / 600.0
+var queue_timer := 0.0
 
 func _ready():
-	pixel_pos = Vector2(0, 0)
-	pixel = Rect2(pixel_pos,Vector2(1, 1))
-	for _p in range(num_pixels):
-		pixels.append(palette[0])
-
-func _draw():
-	var v = Vector2(0, 0)
-	for _p in range(num_pixels):
-		v.x = (_p % 32)
-		v.y = (_p / 32)
-		pixel.position = v
-		draw_rect(pixel, pixels[_p])
+	img.fill(palette[0])
+	set_texture(ImageTexture.create_from_image(img))
 
 func set_pixel_col(index:int, color:int):
-	if pixels.size() > index:
-		pixels[index] = palette[color & 0x0f]
-		queue_redraw()
+	var x := index % 32
+	var y := floori(index / 32.0)
+	img.set_pixel(x, y, palette[color & 0xf])
+	texture.update(img)
 
-func clear():
-	for _p in range(num_pixels):
-		pixels[_p] = palette[0]
+# func _draw():
+# 	texture.update(img)
+
+func _process(delta):
 	queue_redraw()
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(_delta: float) -> void:
-	if running:
-		pass #update()
+func clear():
+	img.fill(palette[0])
+	texture.update(img)

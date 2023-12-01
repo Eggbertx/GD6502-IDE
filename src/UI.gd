@@ -14,6 +14,7 @@ const register_label_format = "A: $%02X    X: $%02X    Y: $%02X    PC: $%04X    
 @onready var help_menu:PopupMenu = $MenuPanel/HBoxContainer/HelpButton.get_popup()
 @onready var code_edit := $MainPanel/CodeEdit
 @onready var highlighter :SyntaxHighlighter = code_edit.syntax_highlighter
+@onready var screen:Screen = $MainPanel/Screen
 
 var loaded_file = ""
 
@@ -65,10 +66,10 @@ func help_menu_selected(id):
 	emit_signal("help_item_selected", id)
 
 func hide_screen():
-	$MainPanel/Screen.hide()
+	screen.hide()
 
 func show_screen():
-	$MainPanel/Screen.show()
+	screen.show()
 
 func log_print(s):
 	$MainPanel/TabContainer/Status.write_line(s)

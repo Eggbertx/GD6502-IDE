@@ -2,6 +2,11 @@
 
 [ext_resource type="Script" path="res://src/Screen.gd" id="1"]
 
-[node name="Screen" type="Sprite2D"]
-scale = Vector2(256, 256)
+[node name="Screen" type="TextureRect"]
+anchors_preset = -1
+anchor_right = 0.047
+anchor_bottom = 0.057
+offset_right = -0.336002
+offset_bottom = 0.079998
+expand_mode = 2
 script = ExtResource("1")
