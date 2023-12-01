@@ -33,8 +33,9 @@ const SETTINGS_PATH = "user://settings.save"
 @onready var logger:TextEdit = $UI/MainPanel/TabContainer/Status
 @onready var screen:Screen = $UI/MainPanel/Screen
 var asm: Assembler
-var max_wait_time := 1.0/60.0
-var wait_time: float = 0.0
+var executions_per_physics_process := 91
+# var max_wait_time := 1.0/60.0
+# var wait_time: float = 0.0
 
 func _ready():
 	load_settings()
@@ -59,10 +60,8 @@ func _notification(what: int) -> void:
 func _physics_process(delta):
 	if $CPU.get_status() != CPU.status.RUNNING:
 		return
-	
-	if wait_time == 0 or wait_time >= max_wait_time:
+	for i in range(executions_per_physics_process):
 		run_cpu()
-		# wait_time += delta
 
 func save_settings():
 	var file := FileAccess.open(SETTINGS_PATH, FileAccess.WRITE)
@@ -97,7 +96,7 @@ func assemble_code():
 
 func run_cpu(force = false):
 	$CPU.execute(force)
-	update_register_label()
+	#update_register_label()
 
 func update_register_label():
 	$UI.update_register_info($CPU.A, $CPU.X, $CPU.Y, $CPU.PC, $CPU.SP, $CPU.flags)
