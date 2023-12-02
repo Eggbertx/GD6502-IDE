@@ -1,5 +1,5 @@
-# GD6502
-A (currently) bare-bones, stripped down 6502 emulator and assembler. Currently, I'm using the 6502asm.com and the [Easy 6502](https://skilldrick.github.io/easy6502/) emulators as goal posts to test GD6502's usefulness. After it's fully compatible with those two emulators, I'll start working on making it compatible with more complex 6502-based systems like the Atari 2600, NES, and others. At that point, I'll start turning it from a standalone project into a library to be integrated into other projects.
+# GD6502 IDE
+A bare-bones, stripped down 6502 emulator and assembler, with syntax highlighted code editing and basic debugging. Currently, I'm using the 6502asm.com and the [Easy 6502](https://skilldrick.github.io/easy6502/) emulators as goal posts to test GD6502's usefulness. After it's fully compatible with those two emulators, I'll move the CPU into its own repository on making it compatible with more complex 6502-based systems like the Atari 2600, NES, and others. At that point, I'll start turning it from a standalone project into a library to be integrated into other projects.
 
 
 ## Examples
