@@ -1,12 +1,13 @@
 extends Node
 
-const REPO_URL = "https://github.com/Eggbertx/GD6502"
+const REPO_URL = "https://github.com/Eggbertx/GD6502-IDE"
 const SETTINGS_PATH = "user://settings.save"
 @onready var logger:TextEdit = $UI/MainPanel/TabContainer/Status
 @onready var screen:Screen = $UI/MainPanel/Screen
 @onready var ui:UI = $UI
 var asm: Assembler
 var executions_per_physics_process := 91
+var debugging := false
 # var max_wait_time := 1.0/60.0
 # var wait_time: float = 0.0
 
@@ -69,7 +70,8 @@ func assemble_code():
 
 func run_cpu(force = false):
 	$CPU.execute(force)
-	#update_register_label()
+	if debugging:
+		update_register_label()
 
 func update_register_label():
 	$UI.update_register_info($CPU.A, $CPU.X, $CPU.Y, $CPU.PC, $CPU.SP, $CPU.flags)
@@ -95,6 +97,7 @@ func enable_emulation(enabled: bool):
 	if enabled:
 		$CPU.load_rom(asm.assembled)
 	ui.emulator_menu.set_item_disabled(UI.EMULATOR_START, !enabled)
+	ui.emulator_menu.set_item_disabled(UI.EMULATOR_DEBUG, !enabled)
 	ui.emulator_menu.set_item_disabled(UI.EMULATOR_PAUSED, !enabled)
 	ui.emulator_menu.set_item_disabled(UI.EMULATOR_RESET, !enabled)
 	ui.emulator_menu.set_item_disabled(UI.EMULATOR_STOP, !enabled)
@@ -118,6 +121,12 @@ func _on_ui_emulator_item_selected(id: int):
 		UI.EMULATOR_START:
 			$CPU.set_status(CPU.status.RUNNING)
 			run_cpu()
+			debugging = false
+			ui.register_label.text = ""
+		UI.EMULATOR_DEBUG:
+			$CPU.set_status(CPU.status.RUNNING)
+			run_cpu()
+			debugging = true
 		UI.EMULATOR_PAUSED:
 			var status = $CPU.get_status()
 			if status == CPU.status.RUNNING:

@@ -14,6 +14,7 @@ enum {
 enum {
 	EMULATOR_ASSEMBLE,
 	EMULATOR_START,
+	EMULATOR_DEBUG,
 	EMULATOR_PAUSED,
 	EMULATOR_RESET,
 	EMULATOR_STOP,
@@ -46,6 +47,7 @@ const register_label_format = "A: $%02X    X: $%02X    Y: $%02X    PC: $%04X    
 @onready var code_edit := $MainPanel/CodeEdit
 @onready var highlighter :SyntaxHighlighter = code_edit.syntax_highlighter
 @onready var screen:Screen = $MainPanel/Screen
+@onready var register_label:RichTextLabel = $MainPanel/RegisterInfo
 
 var loaded_file = ""
 
@@ -73,6 +75,8 @@ func init_menus():
 	file_menu.add_item("Exit")
 	emulator_menu.add_item("Assemble")
 	emulator_menu.add_item("Start")
+	emulator_menu.add_item("Debug")
+	emulator_menu.set_item_tooltip(EMULATOR_DEBUG, "Starts the emulator (may cause the GUI to lag)")
 	emulator_menu.add_check_item("Paused")
 	emulator_menu.add_item("Reset")
 	emulator_menu.add_item("Stop")
@@ -82,7 +86,7 @@ func init_menus():
 	emulator_menu.add_item("Go To Address")
 	emulator_menu.add_separator()
 	emulator_menu.add_item("Clear Log")
-	help_menu.add_item("GD6502 on GitHub")
+	help_menu.add_item("GD6502 IDE on GitHub")
 	help_menu.add_item("6502.org")
 	help_menu.add_item("MOS 6502 Wikipedia")
 	help_menu.add_item("Easy 6502")

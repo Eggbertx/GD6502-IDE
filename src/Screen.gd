@@ -23,14 +23,12 @@ func set_pixel_col(index:int, color:int):
 	var x := index % 32
 	var y := floori(index / 32.0)
 	img.set_pixel(x, y, palette[color & 0xf])
-	texture.update(img)
 
-# func _draw():
-# 	texture.update(img)
+func _draw():
+	texture.update(img)
 
 func _process(delta):
 	queue_redraw()
 
 func clear():
 	img.fill(palette[0])
-	texture.update(img)

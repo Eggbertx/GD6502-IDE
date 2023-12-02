@@ -112,7 +112,6 @@ grow_horizontal = 2
 grow_vertical = 0
 size_flags_horizontal = 3
 bbcode_enabled = true
-text = "A: $00    X: $00    Y: $00    PC: $0000    SP: $0000  |  Flags: [color=red][hint=Negative]N[/hint][/color][color=red][hint=Overflow]V[/hint][/color][color=777]-[/color][color=red][hint=BRK]B[/hint][/color][color=red][hint=BCD]D[/hint][/color][color=red][hint=Interrupt]I[/hint][/color][color=red][hint=Zero]Z[/hint][/color][color=red][hint=Carry]C[/hint][/color]"
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MainPanel"]
 layout_mode = 0

@@ -83,7 +83,7 @@ func unload_rom():
 	memory.resize(_init_ram_size)
 	memory_size = _init_ram_size
 	for b in range(memory_size):
-		memory[b] = 0
+		memory[PC_START + b] = 0
 	rom_unloaded.emit()
 
 func set_logger(newlogger):
@@ -98,6 +98,9 @@ func reset(reset_status:status = _status):
 	flags = 0
 	set_status(reset_status, true)
 	cpu_reset.emit()
+	var reset_range = PC_START if PC_START < memory_size else memory_size
+	for i in range(reset_range):
+		memory[i] = 0
 
 # basic memory operations
 func pop_byte() -> int:
