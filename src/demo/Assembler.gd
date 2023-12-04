@@ -342,9 +342,10 @@ func assemble():
 		return OK
 	var lines = asm_str.split("\n")
 	current_pc = start_pc
+	var success = OK
 	for l in range(lines.size()):
 		var line_str = lines[l]
-		var success = assemble_line(line_str)
+		success = assemble_line(line_str)
 		match success:
 			INVALID_SYNTAX:
 				debug_print("Invalid syntax on line #%d: %s" % [l+1, line_str])
@@ -356,7 +357,7 @@ func assemble():
 				debug_print("Unrecognized opcode on line #%d: %s" % [l+1, line_str])
 				return Opcodes.UNDEFINED_OPCODE
 
-	var success = update_labels()
+	success = update_labels()
 	if success != OK:
 		return success
 	if logger != null and logger.has_method("write_linebreak"):

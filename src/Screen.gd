@@ -27,7 +27,7 @@ func set_pixel_col(index:int, color:int):
 func _draw():
 	texture.update(img)
 
-func _process(delta):
+func _process(_delta):
 	queue_redraw()
 
 func clear():

@@ -80,9 +80,10 @@ func load_rom(bytes:PackedByteArray):
 	rom_loaded.emit(bytes.size())
 
 func unload_rom():
+	memory_size = _init_ram_size if _init_ram_size > PC_START else PC_START
 	memory.resize(_init_ram_size)
 	memory_size = _init_ram_size
-	for b in range(memory_size):
+	for b in range(memory_size - PC_START):
 		memory[PC_START + b] = 0
 	rom_unloaded.emit()
 

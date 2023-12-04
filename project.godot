@@ -12,7 +12,7 @@ config_version=5
 
 config/name="GD6502 IDE"
 run/main_scene="res://src/Main.tscn"
-config/features=PackedStringArray("4.1")
+config/features=PackedStringArray("4.2")
 boot_splash/image="res://assets/icon.png"
 boot_splash/fullsize=false
 config/icon="res://assets/icon.png"
@@ -30,7 +30,7 @@ window/size/viewport_height=560
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/gdUnit4/plugin.cfg")
+enabled=PackedStringArray()
 
 [physics]
 
