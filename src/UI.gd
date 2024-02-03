@@ -1,6 +1,6 @@
 extends Control
 
-class_name UI
+# class_name UI
 
 enum {
 	FILE_OPEN_FILE,

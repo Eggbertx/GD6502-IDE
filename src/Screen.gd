@@ -1,6 +1,6 @@
 extends TextureRect
 
-class_name Screen
+# class_name Screen
 
 const palette = [
 	Color("#000000"), Color("#ffffff"), Color("#880000"), Color("#aaffee"),

@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://c47henxksh20r"]
 
 [ext_resource type="Script" path="res://src/Main.gd" id="1"]
-[ext_resource type="PackedScene" uid="uid://bt7326v3c85am" path="res://src/cpu/CPU.tscn" id="3"]
+[ext_resource type="PackedScene" uid="uid://bt7326v3c85am" path="res://addons/GD6502/CPU.tscn" id="3"]
 [ext_resource type="PackedScene" uid="uid://cikoitjwng02w" path="res://src/UI.tscn" id="5"]
 
 [node name="Main" type="Node"]
