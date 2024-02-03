@@ -37,10 +37,13 @@ lda ($44),Y
 	assert_int(asm.assembled.size()).is_equal(lda_assembled.size())
 	assert_array(asm.assembled).is_equal(lda_assembled)
 	cpu.load_rom(asm.assembled)
+
+	# load values for testing into memory manually since it's easier than a bunch of STr calls,
+	# even if it's a bit hacky
 	cpu.memory[0x44] = 0x01
 	cpu.memory[0x45] = 0x02
 	cpu.memory[0x46] = 0x03
-	cpu.memory[0x0123] = 0x01
+	cpu.memory[0x0123] = 0x04
 
 	assert_int(cpu.A).is_zero()
 	assert_int(cpu.X).is_zero()
@@ -52,5 +55,7 @@ lda ($44),Y
 	assert_int(cpu.X).is_equal(0x01)
 	cpu.step()
 	assert_int(cpu.A).is_equal(0x02)
+	cpu.step()
+	assert_int(cpu.A).is_equal(0x04)
 
 
