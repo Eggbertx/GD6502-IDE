@@ -58,6 +58,7 @@ ok_button_text = "Save"
 show_hidden_files = true
 
 [node name="GoToAddressDialog" parent="." instance=ExtResource("3")]
+initial_position = 4
 
 [node name="MainPanel" type="Panel" parent="."]
 custom_minimum_size = Vector2(0, 20)
@@ -92,9 +93,9 @@ focus_mode = 1
 theme_override_fonts/font = ExtResource("5")
 placeholder_text = "Enter your code here"
 middle_mouse_paste_enabled = false
+syntax_highlighter = SubResource("CodeHighlighter_dorh2")
 highlight_all_occurrences = true
 highlight_current_line = true
-syntax_highlighter = SubResource("CodeHighlighter_dorh2")
 gutters_draw_line_numbers = true
 delimiter_strings = Array[String]([])
 delimiter_comments = Array[String]([";"])

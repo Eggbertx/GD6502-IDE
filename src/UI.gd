@@ -2,36 +2,6 @@ extends Control
 
 class_name UI
 
-enum {
-	FILE_OPEN_FILE,
-	FILE_OPEN_EXAMPLE,
-	FILE_SEPARATOR1,
-	FILE_SAVE,
-	FILE_SAVE_AS,
-	FILE_SEPARATOR2,
-	FILE_EXIT,
-}
-enum {
-	EMULATOR_ASSEMBLE,
-	EMULATOR_START,
-	EMULATOR_DEBUG,
-	EMULATOR_PAUSED,
-	EMULATOR_RESET,
-	EMULATOR_STOP,
-	EMULATOR_SEPARATOR1,
-	EMULATOR_STEP_FORWARD,
-	EMULATOR_STEP_BACK,
-	EMULATOR_GOTO,
-	EMULATOR_SEPARATOR2,
-	EMULATOR_CLEAR_LOG
-}
-enum {
-	HELP_REPO,
-	HELP_6502ORG,
-	HELP_WP_6502,
-	HELP_EASY6502
-}
-
 signal file_selected(path:String)
 signal file_item_selected(id:int)
 signal emulator_item_selected(id:int)
@@ -66,30 +36,9 @@ func init_syntax_highlighting():
 		highlighter.keyword_colors[opcode.to_lower()] = Color.CYAN
 
 func init_menus():
-	file_menu.add_item("Open File")
-	file_menu.add_item("Open Example")
-	file_menu.add_separator()
-	file_menu.add_item("Save")
-	file_menu.add_item("Save As")
-	file_menu.add_separator()
-	file_menu.add_item("Exit")
-	emulator_menu.add_item("Assemble")
-	emulator_menu.add_item("Start")
-	emulator_menu.add_item("Debug")
-	emulator_menu.set_item_tooltip(EMULATOR_DEBUG, "Starts the emulator (may cause the GUI to lag)")
-	emulator_menu.add_check_item("Paused")
-	emulator_menu.add_item("Reset")
-	emulator_menu.add_item("Stop")
-	emulator_menu.add_separator()
-	emulator_menu.add_item("Step Forward")
-	emulator_menu.add_item("Step Back")
-	emulator_menu.add_item("Go To Address")
-	emulator_menu.add_separator()
-	emulator_menu.add_item("Clear Log")
-	help_menu.add_item("GD6502 IDE on GitHub")
-	help_menu.add_item("6502.org")
-	help_menu.add_item("MOS 6502 Wikipedia")
-	help_menu.add_item("Easy 6502")
+	Menus.set_menu_items(file_menu, Menus.file_items)
+	Menus.set_menu_items(emulator_menu, Menus.emulator_items)
+	Menus.set_menu_items(help_menu, Menus.help_items)
 	for i in range(1,9):
 		emulator_menu.set_item_disabled(i, true)
 

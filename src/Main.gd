@@ -96,67 +96,67 @@ func open_rom(path: String):
 func enable_emulation(enabled: bool):
 	if enabled:
 		$CPU.load_rom(asm.assembled)
-	ui.emulator_menu.set_item_disabled(UI.EMULATOR_START, !enabled)
-	ui.emulator_menu.set_item_disabled(UI.EMULATOR_DEBUG, !enabled)
-	ui.emulator_menu.set_item_disabled(UI.EMULATOR_PAUSED, !enabled)
-	ui.emulator_menu.set_item_disabled(UI.EMULATOR_RESET, !enabled)
-	ui.emulator_menu.set_item_disabled(UI.EMULATOR_STOP, !enabled)
-	ui.emulator_menu.set_item_disabled(UI.EMULATOR_STEP_FORWARD, !enabled)
-	ui.emulator_menu.set_item_disabled(UI.EMULATOR_GOTO, !enabled)
+	ui.emulator_menu.set_item_disabled(Menus.EMULATOR_START, !enabled)
+	ui.emulator_menu.set_item_disabled(Menus.EMULATOR_DEBUG, !enabled)
+	ui.emulator_menu.set_item_disabled(Menus.EMULATOR_PAUSED, !enabled)
+	ui.emulator_menu.set_item_disabled(Menus.EMULATOR_RESET, !enabled)
+	ui.emulator_menu.set_item_disabled(Menus.EMULATOR_STOP, !enabled)
+	ui.emulator_menu.set_item_disabled(Menus.EMULATOR_STEP_FORWARD, !enabled)
+	ui.emulator_menu.set_item_disabled(Menus.EMULATOR_GOTO, !enabled)
 
 func _on_ui_file_item_selected(id: int):
 	match id:
-		UI.FILE_OPEN_FILE:
+		Menus.FILE_OPEN_FILE:
 			$UI.open_file_dialog(false)
-		UI.FILE_OPEN_EXAMPLE:
+		Menus.FILE_OPEN_EXAMPLE:
 			$UI.open_file_dialog(true)
-		UI.FILE_EXIT:
+		Menus.FILE_EXIT:
 			get_tree().quit(0)
 
 func _on_ui_emulator_item_selected(id: int):
 	match id:
-		UI.EMULATOR_ASSEMBLE:
+		Menus.EMULATOR_ASSEMBLE:
 			asm.asm_str = $UI/MainPanel/CodeEdit.text
 			enable_emulation(assemble_code() == OK)
-		UI.EMULATOR_START:
+		Menus.EMULATOR_START:
 			$CPU.set_status(CPU.status.RUNNING)
 			run_cpu()
 			debugging = false
 			ui.register_label.text = ""
-		UI.EMULATOR_DEBUG:
+		Menus.EMULATOR_DEBUG:
 			$CPU.set_status(CPU.status.RUNNING)
 			run_cpu()
 			debugging = true
-		UI.EMULATOR_PAUSED:
+		Menus.EMULATOR_PAUSED:
 			var status = $CPU.get_status()
 			if status == CPU.status.RUNNING:
-				ui.emulator_menu.set_item_checked(UI.EMULATOR_PAUSED, true)
+				ui.emulator_menu.set_item_checked(Menus.EMULATOR_PAUSED, true)
 				$CPU.set_status(CPU.status.PAUSED)
 			elif status == CPU.status.PAUSED:
 				$CPU.set_status(CPU.status.RUNNING)
-				ui.emulator_menu.set_item_checked(UI.EMULATOR_PAUSED, false)
-		UI.EMULATOR_STEP_FORWARD:
+				ui.emulator_menu.set_item_checked(Menus.EMULATOR_PAUSED, false)
+		Menus.EMULATOR_STEP_FORWARD:
 			logger.write_line("Stepping forward")
 			$CPU.set_status(CPU.status.PAUSED)
 			run_cpu(true)
-		UI.EMULATOR_STEP_BACK:
+		Menus.EMULATOR_STEP_BACK:
 			logger.write_line("Stepping back")
-		UI.EMULATOR_STOP:
+		Menus.EMULATOR_STOP:
 			$CPU.reset(CPU.status.STOPPED)
-		UI.EMULATOR_GOTO:
+		Menus.EMULATOR_GOTO:
 			$UI/GoToAddressDialog.show()
-		UI.EMULATOR_CLEAR_LOG:
+		Menus.EMULATOR_CLEAR_LOG:
 			$UI/MainPanel/TabContainer/Status.clear()
 
 func _on_ui_help_item_selected(id: int):
 	match id:
-		UI.HELP_REPO:
+		Menus.HELP_REPO:
 			OS.shell_open(REPO_URL)
-		UI.HELP_6502ORG:
+		Menus.HELP_6502ORG:
 			OS.shell_open("http://www.6502.org/")
-		UI.HELP_WP_6502:
+		Menus.HELP_WP_6502:
 			OS.shell_open("https://en.wikipedia.org/wiki/MOS_Technology_6502")
-		UI.HELP_EASY6502:
+		Menus.HELP_EASY6502:
 			OS.shell_open("https://skilldrick.github.io/easy6502/")
 
 func _on_CPU_status_changed(new_status: CPU.status, old_status: int) -> void:
