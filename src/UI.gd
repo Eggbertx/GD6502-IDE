@@ -14,10 +14,11 @@ const register_label_format = "A: $%02X    X: $%02X    Y: $%02X    PC: $%04X    
 @onready var file_menu:PopupMenu = $MenuPanel/HBoxContainer/FileButton.get_popup()
 @onready var emulator_menu:PopupMenu = $MenuPanel/HBoxContainer/EmulatorButton.get_popup()
 @onready var help_menu:PopupMenu = $MenuPanel/HBoxContainer/HelpButton.get_popup()
-@onready var code_edit := $MainPanel/CodeEdit
+@onready var code_edit := $MainPanel/AssemblyCodeEdit
 @onready var highlighter :SyntaxHighlighter = code_edit.syntax_highlighter
 @onready var screen:Screen = $MainPanel/Screen
 @onready var register_label:RichTextLabel = $MainPanel/RegisterInfo
+@onready var find_dialog:FindReplaceDialog = $FindReplaceDialog
 
 var loaded_file = ""
 
@@ -102,7 +103,7 @@ func update_register_info(a: int, x: int, y: int, pc: int, sp: int, flags: int):
 		"green" if (flags & CPU.flag_bit.CARRY) == CPU.flag_bit.CARRY else "red",
 	])
 
-func _unhandled_key_input(event):
+func _unhandled_key_input(event: InputEvent):
 	match event.keycode:
 		KEY_F1:
 			# load non-packaged file
@@ -124,3 +125,6 @@ func _on_GoToAddressDialog_confirmed():
 
 func _on_tab_container_tab_changed(tab: int):
 	print("Switching to tab %s" % $MainPanel/TabContainer.get_tab_title(tab))
+
+func _on_assembly_code_edit_find_triggered():
+	find_dialog.show()

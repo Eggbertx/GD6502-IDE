@@ -1,16 +1,12 @@
-[gd_scene load_steps=7 format=3 uid="uid://cikoitjwng02w"]
+[gd_scene load_steps=8 format=3 uid="uid://cikoitjwng02w"]
 
 [ext_resource type="Script" path="res://src/UI.gd" id="1"]
 [ext_resource type="PackedScene" uid="uid://de851dmqya5ph" path="res://src/Screen.tscn" id="2"]
-[ext_resource type="PackedScene" path="res://src/GoToAddress.tscn" id="3"]
+[ext_resource type="PackedScene" uid="uid://cee2th485uviv" path="res://src/GoToAddress.tscn" id="3"]
 [ext_resource type="PackedScene" uid="uid://be0aqcaj5wour" path="res://src/StatusLogger.tscn" id="4"]
+[ext_resource type="PackedScene" uid="uid://btd2ochiefc4p" path="res://src/AssemblyCodeEdit.tscn" id="4_yx13t"]
 [ext_resource type="FontFile" path="res://assets/NotoSansMonoRegular.tres" id="5"]
-
-[sub_resource type="CodeHighlighter" id="CodeHighlighter_dorh2"]
-number_color = Color(1, 1, 1, 1)
-symbol_color = Color(1, 1, 1, 1)
-function_color = Color(1, 1, 1, 1)
-member_variable_color = Color(1, 1, 1, 1)
+[ext_resource type="PackedScene" uid="uid://be0q61aecxaq7" path="res://src/FindReplaceDialog.tscn" id="6_aip3c"]
 
 [node name="UI" type="Control"]
 layout_mode = 3
@@ -80,26 +76,11 @@ offset_right = 32.0
 offset_bottom = 32.0
 scale = Vector2(8, 8)
 
-[node name="CodeEdit" type="CodeEdit" parent="MainPanel"]
+[node name="AssemblyCodeEdit" parent="MainPanel" instance=ExtResource("4_yx13t")]
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
 offset_left = 256.0
+offset_right = 0.0
 offset_bottom = -272.0
-grow_horizontal = 2
-grow_vertical = 2
-focus_mode = 1
-theme_override_fonts/font = ExtResource("5")
-placeholder_text = "Enter your code here"
-middle_mouse_paste_enabled = false
-syntax_highlighter = SubResource("CodeHighlighter_dorh2")
-highlight_all_occurrences = true
-highlight_current_line = true
-gutters_draw_line_numbers = true
-delimiter_strings = Array[String]([])
-delimiter_comments = Array[String]([";"])
-code_completion_enabled = true
 
 [node name="RegisterInfo" type="RichTextLabel" parent="MainPanel"]
 layout_mode = 1
@@ -140,6 +121,11 @@ layout_mode = 2
 theme_override_fonts/font = ExtResource("5")
 editable = false
 
+[node name="FindReplaceDialog" parent="." instance=ExtResource("6_aip3c")]
+initial_position = 1
+visible = false
+
 [connection signal="file_selected" from="FileDialog" to="." method="_on_FileDialog_file_selected"]
 [connection signal="confirmed" from="GoToAddressDialog" to="." method="_on_GoToAddressDialog_confirmed"]
+[connection signal="find_triggered" from="MainPanel/AssemblyCodeEdit" to="." method="_on_assembly_code_edit_find_triggered"]
 [connection signal="tab_changed" from="MainPanel/TabContainer" to="." method="_on_tab_container_tab_changed"]
