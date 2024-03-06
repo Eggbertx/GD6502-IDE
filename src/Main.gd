@@ -12,6 +12,7 @@ var debugging := false
 # var wait_time: float = 0.0
 
 func _ready():
+	get_window().min_size = Vector2i(688, 560)
 	load_settings()
 	$CPU.set_logger(logger)
 	$CPU.watched_ranges.append([0x200, 0x5ff])
