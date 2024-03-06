@@ -23,11 +23,19 @@ signal cancelled()
 func _ready():
 	pass
 
-func _cancel():
-	hide()
+func _clear(hide_dialog: bool = true):
+	if hide_dialog:
+		hide()
 	find_text = ""
 	replace_text = ""
+
+func _cancel():
+	_clear()
 	cancelled.emit()
+
+func _shortcut_input(event: InputEvent):
+	if event.keycode == KEY_ESCAPE:
+		_clear()
 
 func _on_find_button_pressed():
 	find_triggered.emit(find_text)
@@ -39,5 +47,4 @@ func _on_cancel_button_pressed():
 	_cancel()
 
 func _on_close_requested():
-	print("close")
-	_cancel()
+	_clear()
