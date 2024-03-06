@@ -357,6 +357,7 @@ func assemble():
 				debug_print("Unrecognized opcode on line #%d: %s" % [l+1, line_str])
 				return Opcodes.UNDEFINED_OPCODE
 
+	debug_print("Assembled code succesfully, %d bytes" % assembled.size())
 	success = update_labels()
 	if success != OK:
 		return success
