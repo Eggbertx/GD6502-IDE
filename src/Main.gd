@@ -117,8 +117,15 @@ func _on_ui_file_item_selected(id: int):
 func _on_ui_emulator_item_selected(id: int):
 	match id:
 		Menus.EMULATOR_ASSEMBLE:
-			asm.asm_str = $UI/MainPanel/CodeEdit.text
+			asm.asm_str = $UI/MainPanel/AssemblyCodeEdit.text
 			enable_emulation(assemble_code() == OK)
+		Menus.EMULATOR_ASSEMBLE_AND_START:
+			asm.asm_str = $UI/MainPanel/AssemblyCodeEdit.text
+			if assemble_code() == OK:
+				enable_emulation(true)
+				$CPU.set_status(CPU.status.RUNNING)
+				run_cpu()
+				debugging = false	
 		Menus.EMULATOR_START:
 			$CPU.set_status(CPU.status.RUNNING)
 			run_cpu()

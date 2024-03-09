@@ -3,8 +3,8 @@ extends Node
 class_name Menus
 
 static var file_items: Array[Dictionary] = [
-	{"type": "text", "text": "Open File"},
-	{"type": "text", "text": "Open Example"},
+	{"type": "text", "text": "Open File", "accelerator": KEY_F1},
+	{"type": "text", "text": "Open Example", "accelerator": KEY_F2},
 	{"type": "separator"},
 	{"type": "text", "text": "Save"},
 	{"type": "text", "text": "Save As"},
@@ -14,6 +14,7 @@ static var file_items: Array[Dictionary] = [
 
 static var emulator_items: Array[Dictionary] = [
 	{"type": "text", "text": "Assemble"},
+	{"type": "text", "text": "Assemble and Start", "accelerator": KEY_F5},
 	{"type": "text", "text": "Start"},
 	{"type": "text", "text": "Debug", "tooltip": "Starts the emulator (may cause the GUI to lag)"},
 	{"type": "text", "text": "Paused"},
@@ -49,6 +50,8 @@ static func set_menu_items(menu: PopupMenu, items: Array[Dictionary]):
 				menu.add_item(item["text"], item_id)
 		if item.has("tooltip"):
 			menu.set_item_tooltip(item_id, item["tooltip"])
+		if item.has("accelerator"):
+			menu.set_item_accelerator(item_id, item["accelerator"])
 		id += 1
 
 enum {
@@ -62,6 +65,7 @@ enum {
 }
 enum {
 	EMULATOR_ASSEMBLE,
+	EMULATOR_ASSEMBLE_AND_START,
 	EMULATOR_START,
 	EMULATOR_DEBUG,
 	EMULATOR_PAUSED,

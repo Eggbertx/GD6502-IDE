@@ -6,22 +6,25 @@ signal find_triggered(text: String)
 signal replace_triggered(find: String, replace: String)
 signal cancelled()
 
+@onready var find_edit: LineEdit = $PanelContainer/MarginContainer/VBoxContainer/GridContainer/FindEdit
+@onready var replace_edit: LineEdit = $PanelContainer/MarginContainer/VBoxContainer/GridContainer/ReplaceEdit
+
 @export var find_text := "":
 	get:
-		return $PanelContainer/MarginContainer/VBoxContainer/GridContainer/FindEdit.text
+		return find_edit.text
 	set(v):
-		$PanelContainer/MarginContainer/VBoxContainer/GridContainer/FindEdit.text = v
+		find_edit.text = v
 
 @export var replace_text := "":
 	get:
-		return $PanelContainer/MarginContainer/VBoxContainer/GridContainer/ReplaceEdit.text
+		return replace_edit.text
 	set(v):
-		$PanelContainer/MarginContainer/VBoxContainer/GridContainer/ReplaceEdit.text = v
+		replace_edit.text = v
 
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	pass
+	find_edit.grab_focus()
 
 func _clear(hide_dialog: bool = true):
 	if hide_dialog:
@@ -34,8 +37,15 @@ func _cancel():
 	cancelled.emit()
 
 func _shortcut_input(event: InputEvent):
-	if event.keycode == KEY_ESCAPE:
-		_clear()
+	match event.keycode:
+		KEY_ESCAPE:
+			_clear()
+		KEY_ENTER:
+			var focused = gui_get_focus_owner()
+			if focused == replace_edit and find_text != "":
+				replace_triggered.emit(find_text, replace_text)
+			elif not focused is Button:
+				find_triggered.emit(find_text)
 
 func _on_find_button_pressed():
 	find_triggered.emit(find_text)
@@ -48,3 +58,7 @@ func _on_cancel_button_pressed():
 
 func _on_close_requested():
 	_clear()
+
+func _on_visibility_changed():
+	if visible:
+		find_edit.grab_focus()

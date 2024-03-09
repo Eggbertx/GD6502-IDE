@@ -40,7 +40,7 @@ func init_menus():
 	Menus.set_menu_items(file_menu, Menus.file_items)
 	Menus.set_menu_items(emulator_menu, Menus.emulator_items)
 	Menus.set_menu_items(help_menu, Menus.help_items)
-	for i in range(1,9):
+	for i in range(Menus.EMULATOR_START,Menus.EMULATOR_STEP_BACK):
 		emulator_menu.set_item_disabled(i, true)
 
 func pixel_size():
@@ -103,14 +103,6 @@ func update_register_info(a: int, x: int, y: int, pc: int, sp: int, flags: int):
 		"green" if (flags & CPU.flag_bit.CARRY) == CPU.flag_bit.CARRY else "red",
 	])
 
-func _unhandled_key_input(event: InputEvent):
-	match event.keycode:
-		KEY_F1:
-			# load non-packaged file
-			open_file_dialog(false)
-		KEY_F2:
-			# load example
-			open_file_dialog(true)
 
 func _on_FileDialog_file_selected(path):
 	loaded_file = path
@@ -128,3 +120,20 @@ func _on_tab_container_tab_changed(tab: int):
 
 func _on_assembly_code_edit_find_triggered():
 	find_dialog.show()
+
+func _on_find_replace_dialog_find_triggered(text: String):
+	code_edit.set_search_flags(TextEdit.SEARCH_BACKWARDS)
+	code_edit.set_search_text(text)
+	code_edit.add_selection_for_next_occurrence()
+	code_edit.delete_selection()
+	#var col = code_edit.get_caret_column()
+	#var line = code_edit.get_caret_line()
+
+func _on_find_replace_dialog_replace_triggered(_find: String, _replace: String):
+	pass # Replace with function body.
+
+func _on_find_replace_dialog_cancelled():
+	code_edit.delete_selection()
+
+func _on_assembly_code_edit_clear_search_triggered():
+	code_edit.delete_selection()
