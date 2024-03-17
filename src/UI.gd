@@ -40,8 +40,11 @@ func init_menus():
 	Menus.set_menu_items(file_menu, Menus.file_items)
 	Menus.set_menu_items(emulator_menu, Menus.emulator_items)
 	Menus.set_menu_items(help_menu, Menus.help_items)
-	for i in range(Menus.EMULATOR_START,Menus.EMULATOR_STEP_BACK):
-		emulator_menu.set_item_disabled(i, true)
+	set_emulation_menu_items_enabled(false)
+
+func set_emulation_menu_items_enabled(enabled: bool):
+	for i in range(Menus.EMULATOR_START,Menus.EMULATOR_CLEAR_LOG):
+		emulator_menu.set_item_disabled(i, !enabled)
 
 func pixel_size():
 	return get_viewport().size.x / screen_size

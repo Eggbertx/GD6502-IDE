@@ -97,13 +97,7 @@ func open_rom(path: String):
 func enable_emulation(enabled: bool):
 	if enabled:
 		$CPU.load_rom(asm.assembled)
-	ui.emulator_menu.set_item_disabled(Menus.EMULATOR_START, !enabled)
-	ui.emulator_menu.set_item_disabled(Menus.EMULATOR_DEBUG, !enabled)
-	ui.emulator_menu.set_item_disabled(Menus.EMULATOR_PAUSED, !enabled)
-	ui.emulator_menu.set_item_disabled(Menus.EMULATOR_RESET, !enabled)
-	ui.emulator_menu.set_item_disabled(Menus.EMULATOR_STOP, !enabled)
-	ui.emulator_menu.set_item_disabled(Menus.EMULATOR_STEP_FORWARD, !enabled)
-	ui.emulator_menu.set_item_disabled(Menus.EMULATOR_GOTO, !enabled)
+	ui.set_emulation_menu_items_enabled(enabled)
 
 func _on_ui_file_item_selected(id: int):
 	match id:
@@ -117,10 +111,10 @@ func _on_ui_file_item_selected(id: int):
 func _on_ui_emulator_item_selected(id: int):
 	match id:
 		Menus.EMULATOR_ASSEMBLE:
-			asm.asm_str = $UI/MainPanel/AssemblyCodeEdit.text
+			asm.asm_str = ui.code_edit.text
 			enable_emulation(assemble_code() == OK)
 		Menus.EMULATOR_ASSEMBLE_AND_START:
-			asm.asm_str = $UI/MainPanel/AssemblyCodeEdit.text
+			asm.asm_str = ui.code_edit.text
 			if assemble_code() == OK:
 				enable_emulation(true)
 				$CPU.set_status(CPU.status.RUNNING)
@@ -138,11 +132,11 @@ func _on_ui_emulator_item_selected(id: int):
 		Menus.EMULATOR_PAUSED:
 			var status = $CPU.get_status()
 			if status == CPU.status.RUNNING:
-				ui.emulator_menu.set_item_checked(Menus.EMULATOR_PAUSED, true)
+				# ui.emulator_menu.set_item_checked(Menus.EMULATOR_PAUSED, true)
 				$CPU.set_status(CPU.status.PAUSED)
 			elif status == CPU.status.PAUSED:
 				$CPU.set_status(CPU.status.RUNNING)
-				ui.emulator_menu.set_item_checked(Menus.EMULATOR_PAUSED, false)
+				# ui.emulator_menu.set_item_checked(Menus.EMULATOR_PAUSED, false)
 		Menus.EMULATOR_STEP_FORWARD:
 			logger.write_line("Stepping forward")
 			$CPU.set_status(CPU.status.PAUSED)

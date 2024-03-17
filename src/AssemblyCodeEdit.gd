@@ -13,6 +13,7 @@ func _ready():
 	find_id = menu.item_count + 20
 	clear_id = find_id + 1
 	menu.add_separator()
+	@warning_ignore("INT_AS_ENUM_WITHOUT_MATCH")
 	menu.add_item("Find/Replace", find_id, find_accel)
 	menu.add_item("Clear search results", clear_id, KEY_ESCAPE)
 	menu.connect("id_pressed", find_activated)
