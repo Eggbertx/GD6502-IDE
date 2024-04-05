@@ -14,7 +14,6 @@ var debugging := false
 func _ready():
 	get_window().min_size = Vector2i(480, 560)
 	load_settings()
-	$CPU.set_logger(logger)
 	$CPU.watched_ranges.append([0x200, 0x5ff])
 	asm = Assembler.new()
 	asm.set_logger(logger)
