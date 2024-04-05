@@ -24,29 +24,50 @@ rts
 ldy #$1
 """
 
+const rts_stack_empty_str := """
+jsr lbl
+rts
+
+lbl:
+rts
+"""
+
 var jsr_assembled := PackedByteArray([
-	0x20,  0x04,  0x06, 0x00, 00
+	0x20,  0x04,  0x06, 0x00, 0x00
 ])
 
 var jsr_stack_filled_assembled := PackedByteArray([
 	0x20, 0x00, 0x06
 ])
 
+var rts_assembled := PackedByteArray([
+	0x20, 0x05, 0x06, 0xa9, 0x01, 0xa2, 0x01, 0x60, 0xa0, 0x01 
+])
+
+var rts_stack_empty_assembled := PackedByteArray([
+	0x20, 0x04, 0x06, 0x60, 0x60 
+])
 
 var asm := Assembler.new()
 var cpu := CPU.new()
 var filled := false
+var emptied := false
 
 func on_filled():
 	filled = true
+
+func on_emptied():
+	emptied = true
 
 func before():
 	auto_free(asm)
 	auto_free(cpu)
 	cpu.stack_filled.connect(on_filled)
+	cpu.stack_emptied.connect(on_emptied)
 
 func before_test():
 	filled = false
+	emptied = false
 	cpu.unload_rom()
 	cpu.reset()
 
@@ -56,10 +77,10 @@ func test_jsr():
 	assert_int(asm.assemble()).is_equal(OK)
 	assert_int(asm.assembled.size()).is_equal(jsr_assembled.size())
 	assert_array(asm.assembled).is_equal(jsr_assembled)
-	cpu.load_rom(jsr_assembled)
+	cpu.load_rom(asm.assembled)
 	cpu.step()
 	assert_int(cpu.memory[0x1ff]).is_equal(0x06)
-	assert_int(cpu.memory[0x1fe]).is_equal(0x05)
+	assert_int(cpu.memory[0x1fe]).is_equal(0x02)
 	assert_int(cpu.PC).is_equal(0x604)
 
 func test_jsr_wrap():
@@ -67,9 +88,38 @@ func test_jsr_wrap():
 	assert_int(asm.assemble()).is_equal(OK)
 	assert_int(asm.assembled.size()).is_equal(jsr_stack_filled_assembled.size())
 	assert_array(asm.assembled).is_equal(jsr_stack_filled_assembled)
-	cpu.load_rom(jsr_stack_filled_assembled)
+	cpu.load_rom(asm.assembled)
 
-	cpu.step(128)
+	cpu.step(127)
 	assert_bool(filled).is_false()
-	cpu.step(1)
+	cpu.step()
 	assert_bool(filled).is_true()
+	
+func test_rts():
+	asm.asm_str = rts_str
+	assert_int(asm.assemble()).is_equal(OK)
+	assert_int(asm.assembled.size()).is_equal(rts_assembled.size())
+	assert_array(asm.assembled).is_equal(rts_assembled)
+	cpu.load_rom(asm.assembled)
+	cpu.step()
+	assert_int(cpu.PC).is_equal(0x605)
+	cpu.step()
+	assert_int(cpu.A).is_equal(0)
+	assert_int(cpu.X).is_equal(1)
+	cpu.step()
+	assert_int(cpu.PC).is_equal(0x603)
+	assert_int(cpu.memory[0x1ff]).is_equal(0x06)
+	assert_int(cpu.memory[0x1fe]).is_equal(0x02)
+
+func test_rts_empty():
+	asm.asm_str = rts_stack_empty_str
+	assert_int(asm.assemble()).is_equal(OK)
+	assert_int(asm.assembled.size()).is_equal(rts_stack_empty_assembled.size())
+	assert_array(asm.assembled).is_equal(rts_stack_empty_assembled)
+	cpu.load_rom(asm.assembled)
+	cpu.step()
+	assert_int(cpu.PC).is_equal(0x604)
+	cpu.step()
+	assert_bool(emptied).is_false()
+	cpu.step()
+	assert_bool(emptied).is_true()
