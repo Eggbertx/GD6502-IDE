@@ -98,8 +98,10 @@ func on_emptied():
 
 func before():
 	super()
-	cpu.stack_filled.connect(on_filled)
-	cpu.stack_emptied.connect(on_emptied)
+	if not cpu.stack_filled.is_connected(on_filled):
+		cpu.stack_filled.connect(on_filled)
+	if not cpu.stack_emptied.is_connected(on_emptied):
+		cpu.stack_emptied.connect(on_emptied)
 
 func before_test():
 	super()
