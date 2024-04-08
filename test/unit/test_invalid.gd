@@ -4,7 +4,7 @@ extends GdUnitTestSuite
 @warning_ignore('return_value_discarded')
 # used for testing Assembler.gd's functionality for detecting invalid syntax and aborting assembly when it's detected
 
-const invalid_str = """
+const invalid_str := """
 ; this is valid
 loop:
 jmp loop
@@ -23,7 +23,8 @@ lda #$456 ; > 8 bits
 sta $ a
 """
 
-var asm = Assembler.new()
+var asm := Assembler.new()
+
 func test_invalids():
 	asm.asm_str = invalid_str
 	var success = asm.assemble()

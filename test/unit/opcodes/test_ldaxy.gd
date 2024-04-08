@@ -1,28 +1,11 @@
 # Testing LDA, LDX, and LDY instructions
 
 class_name LDAXYTest
-extends GdUnitTestSuite
+extends CPUTestBase
 @warning_ignore('unused_parameter')
 @warning_ignore('return_value_discarded')
 
-var lda_assembled = PackedByteArray([
-	0xa9, 0x44, 0xa5, 0x44, 0xa2, 0x01, 0xb5, 0x44, 0xad, 0x23, 0x01, 0xbd, 0x23, 0x01, 0xb9, 0x23,
-	0x01, 0xa1, 0x44, 0xb1, 0x44 
-])
-
-var cpu := CPU.new()
-var asm := Assembler.new()
-
-func before():
-	auto_free(cpu)
-	auto_free(asm)
-
-func before_test():
-	cpu.unload_rom()
-	cpu.reset()
-
-func test_lda():
-	asm.asm_str = """
+const lda_str := """
 lda #$44
 lda $44
 ldx #$1
@@ -33,10 +16,14 @@ lda $0123,Y
 lda ($44,X)
 lda ($44),Y
 """
-	assert_int(asm.assemble()).is_equal(OK)
-	assert_int(asm.assembled.size()).is_equal(lda_assembled.size())
-	assert_array(asm.assembled).is_equal(lda_assembled)
-	cpu.load_rom(asm.assembled)
+
+var lda_assembled := PackedByteArray([
+	0xa9, 0x44, 0xa5, 0x44, 0xa2, 0x01, 0xb5, 0x44, 0xad, 0x23, 0x01, 0xbd, 0x23, 0x01, 0xb9, 0x23,
+	0x01, 0xa1, 0x44, 0xb1, 0x44 
+])
+
+func test_lda():
+	setup_assembly(lda_str, lda_assembled)
 
 	# load values for testing into memory manually since it's easier than a bunch of STr calls,
 	# even if it's a bit hacky
