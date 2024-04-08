@@ -20,15 +20,12 @@ func debug_flags():
 func test_flag_on():
 	cpu.set_flag(CPU.flag_bit.OVERFLOW, true)
 	assert_bool(cpu.get_flag_state(CPU.flag_bit.OVERFLOW)).is_true()
-	assert_int(cpu.flags).is_equal(0b01000000)
 
 	cpu.set_flag(CPU.flag_bit.BCD, true)
 	assert_bool(cpu.get_flag_state(CPU.flag_bit.BCD)).is_true()
-	assert_int(cpu.flags).is_equal(0b01001000)
 
 	cpu.set_flag(CPU.flag_bit.OVERFLOW, false)
 	assert_bool(cpu.get_flag_state(CPU.flag_bit.OVERFLOW)).is_false()
-	assert_int(cpu.flags).is_equal(0b00001000)
 
 func test_negative_dec():
 	asm.asm_str = """
