@@ -2,9 +2,14 @@ extends Node
 
 const REPO_URL = "https://github.com/Eggbertx/GD6502-IDE"
 const SETTINGS_PATH = "user://settings.save"
+
 @onready var logger:TextEdit = $UI/MainPanel/TabContainer/Status
 @onready var screen:Screen = $UI/MainPanel/Screen
 @onready var ui:UI = $UI
+var cpu: CPU:
+	get:
+		return $CPU
+
 var asm: Assembler
 var executions_per_physics_process := 91
 var debugging := false
@@ -14,7 +19,7 @@ var debugging := false
 func _ready():
 	get_window().min_size = Vector2i(480, 560)
 	load_settings()
-	$CPU.watched_ranges.append([0x200, 0x5ff])
+	cpu.watched_ranges.append([0x200, 0x5ff])
 	asm = Assembler.new()
 	asm.set_logger(logger)
 	asm.set_hexdump_logger($UI/MainPanel/TabContainer/Hexdump)
@@ -24,15 +29,15 @@ func _ready():
 
 func _input(event):
 	if event is InputEventKey:
-		if $CPU.get_status() == $CPU.status.RUNNING and $CPU.memory.size() >= 0xFF:
-			$CPU.memory[0xFF] = event.keycode & 0xFF
+		if cpu.get_status() == cpu.status.RUNNING and cpu.memory.size() >= 0xFF:
+			cpu.memory[0xFF] = event.keycode & 0xFF
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST or what == NOTIFICATION_EXIT_TREE:
 		save_settings()
 
 func _physics_process(_delta):
-	if $CPU.get_status() != CPU.status.RUNNING:
+	if cpu.get_status() != CPU.status.RUNNING:
 		return
 	for i in range(executions_per_physics_process):
 		run_cpu()
@@ -63,23 +68,23 @@ func load_settings():
 func assemble_code():
 	var success = asm.assemble()
 	asm.update_hexdump()
-	$CPU.reset()
+	cpu.reset()
 	$UI/MainPanel/TabContainer.current_tab = 0
 	screen.clear()
 	return success
 
 func run_cpu(force = false):
-	$CPU.execute(force)
+	cpu.execute(force)
 	if debugging:
 		update_register_label()
 
 func update_register_label():
-	$UI.update_register_info($CPU.A, $CPU.X, $CPU.Y, $CPU.PC, $CPU.SP, $CPU.flags)
+	$UI.update_register_info(cpu.A, cpu.X, cpu.Y, cpu.PC, cpu.SP, cpu.flags)
 
 func open_rom(path: String):
 	$UI.log_print("Loading file: %s" % path)
 	$UI.log_line()
-	$CPU.memory.resize($CPU.PC_START)
+	cpu.memory.resize(cpu.pc_start)
 	var file := FileAccess.open(path, FileAccess.READ)
 	if file == null:
 		$UI.log_print("Got error code %d while loading %s" % [FileAccess.get_open_error(), path])
@@ -88,14 +93,15 @@ func open_rom(path: String):
 	asm.asm_str = file.get_as_text()
 	$UI.set_assembly_source(asm.asm_str)
 	file.close()
-	var success = assemble_code()
-	if success == OK:
-		$CPU.reset($CPU.status.RUNNING)
-		run_cpu()
+	var success: bool = assemble_code() == OK
+	enable_emulation(success)
+	if success:
+		cpu.reset(cpu.status.STOPPED)
+		# run_cpu()
 
 func enable_emulation(enabled: bool):
 	if enabled:
-		$CPU.load_rom(asm.assembled)
+		cpu.load_rom(asm.assembled)
 	ui.set_emulation_menu_items_enabled(enabled)
 
 func _on_ui_file_item_selected(id: int):
@@ -116,34 +122,34 @@ func _on_ui_emulator_item_selected(id: int):
 			asm.asm_str = ui.code_edit.text
 			if assemble_code() == OK:
 				enable_emulation(true)
-				$CPU.set_status(CPU.status.RUNNING)
+				cpu.set_status(CPU.status.RUNNING)
 				run_cpu()
 				debugging = false	
 		Menus.EMULATOR_START:
-			$CPU.set_status(CPU.status.RUNNING)
+			cpu.set_status(CPU.status.RUNNING)
 			run_cpu()
 			debugging = false
 			ui.register_label.text = ""
 		Menus.EMULATOR_DEBUG:
-			$CPU.set_status(CPU.status.RUNNING)
+			cpu.set_status(CPU.status.RUNNING)
 			run_cpu()
 			debugging = true
 		Menus.EMULATOR_PAUSED:
-			var status = $CPU.get_status()
+			var status = cpu.get_status()
 			if status == CPU.status.RUNNING:
 				# ui.emulator_menu.set_item_checked(Menus.EMULATOR_PAUSED, true)
-				$CPU.set_status(CPU.status.PAUSED)
+				cpu.set_status(CPU.status.PAUSED)
 			elif status == CPU.status.PAUSED:
-				$CPU.set_status(CPU.status.RUNNING)
+				cpu.set_status(CPU.status.RUNNING)
 				# ui.emulator_menu.set_item_checked(Menus.EMULATOR_PAUSED, false)
 		Menus.EMULATOR_STEP_FORWARD:
 			logger.write_line("Stepping forward")
-			$CPU.set_status(CPU.status.PAUSED)
+			cpu.set_status(CPU.status.PAUSED)
 			run_cpu(true)
 		Menus.EMULATOR_STEP_BACK:
 			logger.write_line("Stepping back")
 		Menus.EMULATOR_STOP:
-			$CPU.reset(CPU.status.STOPPED)
+			cpu.reset(CPU.status.STOPPED)
 		Menus.EMULATOR_GOTO:
 			$UI/GoToAddressDialog.show()
 		Menus.EMULATOR_CLEAR_LOG:
@@ -176,7 +182,7 @@ func _on_CPU_status_changed(new_status: CPU.status, old_status: int) -> void:
 			if old_status == CPU.status.RUNNING:
 				logger.write_line("Pausing emulator")
 		CPU.status.END:
-			logger.write_line("Program end at PC=$%04X" % $CPU.PC)
+			logger.write_line("Program end at PC=$%04X" % cpu.PC)
 
 
 func _on_cpu_cpu_reset():

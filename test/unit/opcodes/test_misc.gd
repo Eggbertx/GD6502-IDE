@@ -17,4 +17,4 @@ var nop_assembled := PackedByteArray([
 func test_nop():
 	setup_assembly(nop_str, nop_assembled)
 	cpu.step(4)
-	assert_int(cpu.PC).is_equal(cpu.PC_START+4)
+	assert_int(cpu.PC).is_equal(cpu.pc_start+4)

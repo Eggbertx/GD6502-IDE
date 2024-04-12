@@ -10,6 +10,7 @@ script = ExtResource("1")
 [node name="UI" parent="." instance=ExtResource("5")]
 
 [node name="CPU" parent="." instance=ExtResource("3")]
+memory = PackedByteArray()
 
 [connection signal="emulator_item_selected" from="UI" to="." method="_on_ui_emulator_item_selected"]
 [connection signal="file_item_selected" from="UI" to="." method="_on_ui_file_item_selected"]
