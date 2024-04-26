@@ -1,13 +1,14 @@
 # GD6502 IDE
 A bare-bones [6502](https://en.wikipedia.org/wiki/MOS_Technology_6502) emulator, with syntax highlighted code editing and basic debugging. Currently, I'm using the 6502asm.com and the [Easy 6502](https://skilldrick.github.io/easy6502/) emulators as goal posts to test GD6502's usefulness. After it's fully compatible with those two emulators, I'll work on making it compatible with more complex 6502-based systems like the Atari 2600, NES, and others.
 
+![Simple demonstration of GD6502 IDE running godotlogo.asm in the examples/othertests/ directory](./assets/gd6502.gif)
 
 ## Core
 The core 6502 emulation component has been moved to its own repository [here](https://github.com/eggbertx/GD6502). This repository is used for basic demonstration and unit testing.
 
 
 ## Examples
-- The examples in [./examples/6502asm/](./examples/6502asm/) come from http://6502asm.com/ and credit goes to their original authors.
+- The examples in [./examples/6502asm/](./examples/6502asm/) come from 6502asm.com (no longer active) and credit goes to their original authors.
 - The examples in [./examples/otherasm/](./examples/otherasm/) are for general assembler testing and may or may not be moved to the unit testing directory.
 
 
