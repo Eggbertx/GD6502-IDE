@@ -5,3 +5,4 @@ export.cfg
 export_presets.cfg
 /.godot/
 /reports/
+addons/gdUnit4/tmp-update/
