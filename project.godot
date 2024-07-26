@@ -32,6 +32,10 @@ window/size/viewport_height=560
 
 enabled=PackedStringArray("res://addons/gdUnit4/plugin.cfg")
 
+[gdunit4]
+
+settings/test/test_discovery=true
+
 [physics]
 
 2d/run_on_separate_thread=true
