@@ -169,6 +169,50 @@ lda #$11
 ora ($20),y; A = #$11 | #$44 = #$55
 """
 
+const bit_str := """
+; zero-page addressing
+lda #$80
+sta $10
+lda #$0 ; clears N flag
+bit $10 ; sets N flag
+sta $10
+lda #$80
+bit $10 ; clear N flag
+lda #$40
+sta $10
+lda #$0
+bit $10 ; sets V flag
+lda #$c0
+sta $10
+lda #$0
+bit $10 ; sets N, V
+lda #$0
+sta $10
+lda #$1
+bit $10 ; sets Z to 0
+
+; absolute addressing
+lda #$80
+sta $100
+lda #$0 ; clears N flag
+bit $100 ; sets N flag
+sta $100
+lda #$80
+bit $100 ; clear N flag
+lda #$40
+sta $100
+lda #$0
+bit $100 ; sets V flag
+lda #$c0
+sta $100
+lda #$0
+bit $100 ; sets N, V
+lda #$0
+sta $100
+lda #$1
+bit $100 ; sets Z to 0
+"""
+
 var and_assembled := PackedByteArray([
 	0xa9, 0x55, 0x29, 0x0f, 0xa9, 0xaa, 0x85, 0x03, 0xa9, 0x55, 0x29, 0x0f, 0xa2, 0x01, 0xa0, 0x01, 
 	0xa9, 0x0e, 0x85, 0x01, 0xa9, 0xf0, 0x85, 0xaa, 0xa9, 0x0f, 0x25, 0x12, 0xa9, 0xaa, 0x35, 0x00, 
@@ -215,12 +259,22 @@ var lsr_zp_carry_assembled := PackedByteArray([
 	0xa9, 0x03, 0x85, 0x01, 0x46, 0x01, 0x46, 0x01, 0x46, 0x01 
 ])
 
+
 var ora_assembled := PackedByteArray([
 	0xa9, 0x55, 0x09, 0xaa, 0xa9, 0x33, 0x85, 0x10, 0xa9, 0x0f, 0x05, 0x10, 0xa9, 0x22, 0x95, 0x10,
 	0xa9, 0x11, 0x15, 0x10, 0xa9, 0x44, 0x8d, 0x00, 0x02, 0xa9, 0x11, 0x0d, 0x00, 0x02, 0xa9, 0x66,
 	0x9d, 0x00, 0x02, 0xa9, 0x11, 0x1d, 0x00, 0x02, 0xa9, 0x88, 0x99, 0x00, 0x02, 0xa9, 0x11, 0x19,
 	0x00, 0x02, 0xa9, 0x55, 0x85, 0x10, 0xa9, 0x00, 0x85, 0x11, 0xa9, 0x11, 0x01, 0x10, 0xa9, 0x44,
 	0x85, 0x20, 0xa9, 0x00, 0x85, 0x21, 0xa9, 0x11, 0x11, 0x20
+])
+
+var bit_assembled = PackedByteArray([
+	0xa9, 0x80, 0x85, 0x10, 0xa9, 0x00, 0x24, 0x10, 0x85, 0x10, 0xa9, 0x80, 0x24, 0x10, 0xa9, 0x40,
+	0x85, 0x10, 0xa9, 0x00, 0x24, 0x10, 0xa9, 0xc0, 0x85, 0x10, 0xa9, 0x00, 0x24, 0x10, 0xa9, 0x00,
+	0x85, 0x10, 0xa9, 0x01, 0x24, 0x10, 0xa9, 0x80, 0x8d, 0x00, 0x01, 0xa9, 0x00, 0x2c, 0x00, 0x01,
+	0x8d, 0x00, 0x01, 0xa9, 0x80, 0x2c, 0x00, 0x01, 0xa9, 0x40, 0x8d, 0x00, 0x01, 0xa9, 0x00, 0x2c,
+	0x00, 0x01, 0xa9, 0xc0, 0x8d, 0x00, 0x01, 0xa9, 0x00, 0x2c, 0x00, 0x01, 0xa9, 0x00, 0x8d, 0x00,
+	0x01, 0xa9, 0x01, 0x2c, 0x00, 0x01
 ])
 
 func test_and():
@@ -414,3 +468,66 @@ func test_ora():
 	assert_int(cpu.A).is_equal(0x44)
 	cpu.step(5)
 	assert_int(cpu.A).is_equal(0x55)
+
+func test_bit():
+	setup_assembly(bit_str, bit_assembled)
+	# for i in range(2): # code used is repeated
+	cpu.step(2)
+	assert_int(cpu.A).is_equal(0x80)
+	assert_bool(cpu.get_flag_state(CPU.flag_bit.NEGATIVE)).is_true()
+	assert_bool(cpu.get_flag_state(CPU.flag_bit.OVERFLOW)).is_false()
+	cpu.step()
+	assert_bool(cpu.get_flag_state(CPU.flag_bit.NEGATIVE)).is_false()
+	assert_int(cpu.A).is_equal(0)
+	cpu.step()
+	assert_bool(cpu.get_flag_state(CPU.flag_bit.NEGATIVE)).is_true()
+	cpu.step(2)
+	assert_int(cpu.A).is_equal(0x80)
+	cpu.step()
+	assert_bool(cpu.get_flag_state(CPU.flag_bit.NEGATIVE)).is_false()
+	cpu.step(3)
+	assert_bool(cpu.get_flag_state(CPU.flag_bit.OVERFLOW)).is_false()
+	cpu.step()
+	assert_bool(cpu.get_flag_state(CPU.flag_bit.OVERFLOW)).is_true()
+	cpu.step(3)
+	assert_bool(cpu.get_flag_state(CPU.flag_bit.NEGATIVE)).is_false()
+	assert_bool(cpu.get_flag_state(CPU.flag_bit.OVERFLOW)).is_true()
+	cpu.step()
+	assert_bool(cpu.get_flag_state(CPU.flag_bit.NEGATIVE)).is_true()
+	assert_bool(cpu.get_flag_state(CPU.flag_bit.OVERFLOW)).is_true()
+	cpu.step(3)
+	assert_int(cpu.A).is_equal(1)
+	assert_bool(cpu.get_flag_state(CPU.flag_bit.ZERO)).is_false()
+	cpu.step()
+	assert_bool(cpu.get_flag_state(CPU.flag_bit.ZERO)).is_false()
+
+	# absolute addressing, copied instead of using a for loop to make debugging easier
+	cpu.step(2)
+	assert_int(cpu.A).is_equal(0x80)
+	assert_bool(cpu.get_flag_state(CPU.flag_bit.NEGATIVE)).is_true()
+	assert_bool(cpu.get_flag_state(CPU.flag_bit.OVERFLOW)).is_false()
+	cpu.step()
+	assert_bool(cpu.get_flag_state(CPU.flag_bit.NEGATIVE)).is_false()
+	assert_int(cpu.A).is_equal(0)
+	cpu.step()
+	assert_bool(cpu.get_flag_state(CPU.flag_bit.NEGATIVE)).is_true()
+	cpu.step(2)
+	assert_int(cpu.A).is_equal(0x80)
+	cpu.step()
+	assert_bool(cpu.get_flag_state(CPU.flag_bit.NEGATIVE)).is_false()
+	cpu.step(3)
+	assert_bool(cpu.get_flag_state(CPU.flag_bit.OVERFLOW)).is_false()
+	cpu.step()
+	assert_bool(cpu.get_flag_state(CPU.flag_bit.OVERFLOW)).is_true()
+	cpu.step(3)
+	assert_bool(cpu.get_flag_state(CPU.flag_bit.NEGATIVE)).is_false()
+	assert_bool(cpu.get_flag_state(CPU.flag_bit.OVERFLOW)).is_true()
+	cpu.step()
+	assert_bool(cpu.get_flag_state(CPU.flag_bit.NEGATIVE)).is_true()
+	assert_bool(cpu.get_flag_state(CPU.flag_bit.OVERFLOW)).is_true()
+	cpu.step(3)
+	assert_int(cpu.A).is_equal(1)
+	assert_bool(cpu.get_flag_state(CPU.flag_bit.ZERO)).is_false()
+	cpu.step()
+	assert_bool(cpu.get_flag_state(CPU.flag_bit.ZERO)).is_false()
+
