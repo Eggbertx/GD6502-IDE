@@ -530,4 +530,3 @@ func test_bit():
 	assert_bool(cpu.get_flag_state(CPU.flag_bit.ZERO)).is_false()
 	cpu.step()
 	assert_bool(cpu.get_flag_state(CPU.flag_bit.ZERO)).is_false()
-
