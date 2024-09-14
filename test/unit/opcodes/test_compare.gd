@@ -156,6 +156,96 @@ lda #$10
 cmp ($fa),y
 """
 
+const cpx_imm_str = """
+ldx #$10
+cpx #$f
+clc
+ldx #$10
+cpx #$10
+clc
+ldx #$10
+cpx #$11
+"""
+
+const cpx_zp_str = """
+ldx #$f
+stx $aa
+ldx #$10
+stx $ab
+ldx #$11
+stx $ac
+ldx #$10
+cpx $aa
+clc
+ldx #$10
+cpx $ab
+clc
+ldx #$10
+cpx $ac
+"""
+
+const cpx_abs_str = """
+ldx #$f
+stx $100
+ldx #$10
+stx $101
+ldx #$11
+stx $102
+ldx #$10
+cpx $100
+clc
+ldx #$10
+cpx $101
+clc
+ldx #$10
+cpx $102
+"""
+
+const cpy_imm_str = """
+ldy #$10
+cpy #$f
+clc
+ldy #$10
+cpy #$10
+clc
+ldy #$10
+cpy #$11
+"""
+
+const cpy_zp_str = """
+ldy #$f
+sty $aa
+ldy #$10
+sty $ab
+ldy #$11
+sty $ac
+ldy #$10
+cpy $aa
+clc
+ldy #$10
+cpy $ab
+clc
+ldy #$10
+cpy $ac
+"""
+
+const cpy_abs_str = """
+ldy #$f
+sty $100
+ldy #$10
+sty $101
+ldy #$11
+sty $102
+ldy #$10
+cpy $100
+clc
+ldy #$10
+cpy $101
+clc
+ldy #$10
+cpy $102
+"""
+
 var cmp_imm_assembled := PackedByteArray([
 	0xa9, 0x10, 0xc9, 0x0f, 0x18, 0xa9, 0x10, 0xc9, 0x10, 0x18, 0xa9, 0x10, 0xc9, 0x11
 ])
@@ -197,6 +287,34 @@ var cmp_indy_assembled := PackedByteArray([
 	0xa9, 0x01, 0x85, 0xfb, 0xa9, 0xc0, 0x85, 0xfa, 0xa0, 0x01, 0xa9, 0x0f, 0x8d, 0xc1, 0x01, 0xa9,
 	0x10, 0xd1, 0xfa, 0xa0, 0x01, 0xa9, 0x10, 0x8d, 0xc1, 0x01, 0xa9, 0x10, 0xd1, 0xfa, 0xa0, 0x01,
 	0xa9, 0x11, 0x8d, 0xc1, 0x01, 0xa9, 0x10, 0xd1, 0xfa
+])
+
+var cpx_imm_assembled := PackedByteArray([
+	0xa2, 0x10, 0xe0, 0x0f, 0x18, 0xa2, 0x10, 0xe0, 0x10, 0x18, 0xa2, 0x10, 0xe0, 0x11
+])
+
+var cpx_zp_assembled := PackedByteArray([
+	0xa2, 0x0f, 0x86, 0xaa, 0xa2, 0x10, 0x86, 0xab, 0xa2, 0x11, 0x86, 0xac, 0xa2, 0x10, 0xe4, 0xaa,
+	0x18, 0xa2, 0x10, 0xe4, 0xab, 0x18, 0xa2, 0x10, 0xe4, 0xac
+])
+
+var cpx_abs_assembled := PackedByteArray([
+	0xa2, 0x0f, 0x8e, 0x00, 0x01, 0xa2, 0x10, 0x8e, 0x01, 0x01, 0xa2, 0x11, 0x8e, 0x02, 0x01, 0xa2,
+	0x10, 0xec, 0x00, 0x01, 0x18, 0xa2, 0x10, 0xec, 0x01, 0x01, 0x18, 0xa2, 0x10, 0xec, 0x02, 0x01
+])
+
+var cpy_imm_assembled := PackedByteArray([
+	0xa0, 0x10, 0xc0, 0x0f, 0x18, 0xa0, 0x10, 0xc0, 0x10, 0x18, 0xa0, 0x10, 0xc0, 0x11
+])
+
+var cpy_zp_assembled := PackedByteArray([
+	0xa0, 0x0f, 0x84, 0xaa, 0xa0, 0x10, 0x84, 0xab, 0xa0, 0x11, 0x84, 0xac, 0xa0, 0x10, 0xc4, 0xaa,
+	0x18, 0xa0, 0x10, 0xc4, 0xab, 0x18, 0xa0, 0x10, 0xc4, 0xac
+])
+
+var cpy_abs_assembled := PackedByteArray([
+	0xa0, 0x0f, 0x8c, 0x00, 0x01, 0xa0, 0x10, 0x8c, 0x01, 0x01, 0xa0, 0x11, 0x8c, 0x02, 0x01, 0xa0,
+	0x10, 0xcc, 0x00, 0x01, 0x18, 0xa0, 0x10, 0xcc, 0x01, 0x01, 0x18, 0xa0, 0x10, 0xcc, 0x02, 0x01
 ])
 
 func test_cmp_imm():
@@ -314,5 +432,83 @@ func test_cmp_indy():
 	cpu.step(4)
 	assert_int(cpu.A).is_equal(0x10)
 	cpu.step()
+	assert_bool(cpu.carry_flag).is_false()
+	assert_bool(cpu.zero_flag).is_false()
+
+func test_cpx_imm():
+	setup_assembly(cpx_imm_str, cpx_imm_assembled)
+	cpu.step(2)
+	assert_int(cpu.X).is_equal(0x10)
+	assert_bool(cpu.carry_flag).is_true()
+	assert_bool(cpu.zero_flag).is_false()
+	cpu.step(3)
+	assert_bool(cpu.carry_flag).is_true()
+	assert_bool(cpu.zero_flag).is_true()
+	cpu.step(3)
+	assert_bool(cpu.carry_flag).is_false()
+	assert_bool(cpu.zero_flag).is_false()
+
+func test_cpx_zp():
+	setup_assembly(cpx_zp_str, cpx_zp_assembled)
+	cpu.step(8)
+	assert_int(cpu.X).is_equal(0x10)
+	assert_bool(cpu.carry_flag).is_true()
+	assert_bool(cpu.zero_flag).is_false()
+	cpu.step(3)
+	assert_bool(cpu.carry_flag).is_true()
+	assert_bool(cpu.zero_flag).is_true()
+	cpu.step(3)
+	assert_bool(cpu.carry_flag).is_false()
+	assert_bool(cpu.zero_flag).is_false()
+
+func test_cpx_abs():
+	setup_assembly(cpx_abs_str, cpx_abs_assembled)
+	cpu.step(8)
+	assert_int(cpu.X).is_equal(0x10)
+	assert_bool(cpu.carry_flag).is_true()
+	assert_bool(cpu.zero_flag).is_false()
+	cpu.step(3)
+	assert_bool(cpu.carry_flag).is_true()
+	assert_bool(cpu.zero_flag).is_true()
+	cpu.step(3)
+	assert_bool(cpu.carry_flag).is_false()
+	assert_bool(cpu.zero_flag).is_false()
+
+func test_cpy_imm():
+	setup_assembly(cpy_imm_str, cpy_imm_assembled)
+	cpu.step(2)
+	assert_int(cpu.Y).is_equal(0x10)
+	assert_bool(cpu.carry_flag).is_true()
+	assert_bool(cpu.zero_flag).is_false()
+	cpu.step(3)
+	assert_bool(cpu.carry_flag).is_true()
+	assert_bool(cpu.zero_flag).is_true()
+	cpu.step(3)
+	assert_bool(cpu.carry_flag).is_false()
+	assert_bool(cpu.zero_flag).is_false()
+
+func test_cpy_zp():
+	setup_assembly(cpy_zp_str, cpy_zp_assembled)
+	cpu.step(8)
+	assert_int(cpu.Y).is_equal(0x10)
+	assert_bool(cpu.carry_flag).is_true()
+	assert_bool(cpu.zero_flag).is_false()
+	cpu.step(3)
+	assert_bool(cpu.carry_flag).is_true()
+	assert_bool(cpu.zero_flag).is_true()
+	cpu.step(3)
+	assert_bool(cpu.carry_flag).is_false()
+	assert_bool(cpu.zero_flag).is_false()
+
+func test_cpy_abs():
+	setup_assembly(cpy_abs_str, cpy_abs_assembled)
+	cpu.step(8)
+	assert_int(cpu.Y).is_equal(0x10)
+	assert_bool(cpu.carry_flag).is_true()
+	assert_bool(cpu.zero_flag).is_false()
+	cpu.step(3)
+	assert_bool(cpu.carry_flag).is_true()
+	assert_bool(cpu.zero_flag).is_true()
+	cpu.step(3)
 	assert_bool(cpu.carry_flag).is_false()
 	assert_bool(cpu.zero_flag).is_false()
