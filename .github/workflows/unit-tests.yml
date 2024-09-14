@@ -43,7 +43,7 @@ jobs:
     timeout-minutes: 15
 
     uses: ./.github/actions/unit-test
-      with:
-        godot-version: ${{ inputs.godot-version }}
-        godot-status: ${{ inputs.godot-status }}
-        paths: 'res://test/'
+    with:
+      godot-version: ${{ inputs.godot-version }}
+      godot-status: ${{ inputs.godot-status }}
+      paths: 'res://test/'
