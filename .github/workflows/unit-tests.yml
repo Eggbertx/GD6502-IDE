@@ -38,11 +38,12 @@ concurrency:
 
 jobs:
   unit-test:
-    name: "Unit Tests"
-    runs-on: ${{ inputs.os }}
-    timeout-minutes: 15
-    uses: ./.github/actions/unit-test
-    with:
-      godot-version: ${{ inputs.godot-version }}
-      godot-status: ${{ inputs.godot-status }}
-      paths: 'res://test/'
+    steps:
+      - name: "Unit Tests"
+        runs-on: ${{ inputs.os }}
+        timeout-minutes: 15
+        uses: ./.github/actions/unit-test
+        with:
+          godot-version: ${{ inputs.godot-version }}
+          godot-status: ${{ inputs.godot-status }}
+          paths: 'res://test/'
