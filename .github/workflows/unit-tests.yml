@@ -42,8 +42,8 @@ jobs:
     runs-on: ${{ inputs.os }}
     timeout-minutes: 15
 
-    uses: MikeSchulze/gdUnit4-action@v1.1.1
-    with:
-      godot-version: ${{ inputs.godot-version }}
-      godot-status: ${{ inputs.godot-status }}
-      paths: 'test/'
+    uses: ./.github/actions/unit-test
+      with:
+        godot-version: ${{ inputs.godot-version }}
+        godot-status: ${{ inputs.godot-status }}
+        paths: 'res://test/'
