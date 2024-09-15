@@ -331,35 +331,44 @@ func update_hexdump():
 		dump_pc += 1
 	hexdump_logger.text = dump
 
-func assemble():
+func _reset():
 	assembled.resize(0)
 	labels.clear()
 	label_refs.clear()
 	relative_calls.clear()
+	current_pc = start_pc
+
+
+func assemble() -> int:
+	_reset()
 
 	if asm_str == "":
 		debug_print("No code to assemble")
 		return OK
 	var lines = asm_str.split("\n")
-	current_pc = start_pc
 	var success = OK
+
 	for l in range(lines.size()):
 		var line_str = lines[l]
 		success = assemble_line(line_str)
 		match success:
 			INVALID_SYNTAX:
 				debug_print("Invalid syntax on line #%d: %s" % [l+1, line_str])
+				_reset()
 				return INVALID_SYNTAX
 			Opcodes.INVALID_ADDRESS_MODE:
 				debug_print("Invalid addressing mode on line #%d: %s" % [l+1, line_str])
+				_reset()
 				return Opcodes.INVALID_ADDRESS_MODE
 			Opcodes.UNDEFINED_OPCODE:
 				debug_print("Unrecognized opcode on line #%d: %s" % [l+1, line_str])
+				_reset()
 				return Opcodes.UNDEFINED_OPCODE
 
 	debug_print("Assembled code succesfully, %d bytes" % assembled.size())
 	success = update_labels()
 	if success != OK:
+		_reset()
 		return success
 	if logger != null and logger.has_method("write_linebreak"):
 		logger.write_linebreak()
