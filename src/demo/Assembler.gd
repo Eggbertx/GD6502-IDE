@@ -18,25 +18,25 @@ var program_offset_re = RegEx.new()
 var high_byte_re = RegEx.new()
 var low_byte_re = RegEx.new()
 
-var asm_file = ""
-var asm_str = ""
+var asm_file := ""
+var asm_str := ""
 
 # Used for storing label locations in the assembled[] to be given
 # the correct address when the assembling is complete
 # unset labels are $FFFF by default
-var labels = {
+var labels := {
 	# "labelname": 0xFFFF
 }
 
 # appended to on lines like jmp labelname, with "location" referring to the position in the byte array
 # that the request was made
-var label_refs = [
+var label_refs := [
 	# {"name": "labelname", "location": 0}
 ]
 
 # used for referencing labels in branch calls, with "location" referring to the position in the byte array
 # to be replaced with the distance between the label's address and "pc"
-var relative_calls = [
+var relative_calls := [
 	# {"location": 0x01, "label": "start", "pc": current_pc}
 ]
 
