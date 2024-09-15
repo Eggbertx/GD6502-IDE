@@ -64,6 +64,52 @@ lda #$01
 jmp loop
 """
 
+const bmi_str = """
+ldx #$7f
+bmi loop
+inx
+bmi loop
+jmp $600
+loop:
+lda #$01
+jmp loop
+"""
+
+const bpl_str = """
+ldx #$80
+bpl loop
+dex
+bpl loop
+jmp $600
+loop:
+lda #$01
+jmp loop
+"""
+
+const bvc_str = """
+lda #$7f
+adc #$1
+bvc loop
+clv
+bvc loop
+jmp $600
+loop:
+lda #$01
+jmp loop
+"""
+
+const bvs_str = """
+lda #$7f
+bvs loop
+adc #$1
+bvs loop
+jmp $600
+loop:
+lda #$01
+jmp loop
+"""
+
+
 var beq_label_after_assembled := PackedByteArray([
 	0xa2, 0x01, 0xf0, 0x06, 0xca, 0xf0, 0x03, 0x4c, 0x00, 0x06, 0xea
 ])
@@ -83,6 +129,23 @@ var bcc_assembled := PackedByteArray([
 
 var bcs_assembled := PackedByteArray([
 	0x18, 0xb0, 0x06, 0x38, 0xb0, 0x03, 0x4c, 0x00, 0x06, 0xa9, 0x01, 0x4c, 0x09, 0x06
+])
+
+var bmi_assembled := PackedByteArray([
+	0xa2, 0x7f, 0x30, 0x06, 0xe8, 0x30, 0x03, 0x4c, 0x00, 0x06, 0xa9, 0x01, 0x4c, 0x0a, 0x06
+])
+
+var bpl_assembled := PackedByteArray([
+	0xa2, 0x80, 0x10, 0x06, 0xca, 0x10, 0x03, 0x4c, 0x00, 0x06, 0xa9, 0x01, 0x4c, 0x0a, 0x06
+])
+
+var bvc_assembled := PackedByteArray([
+	0xa9, 0x7f, 0x69, 0x01, 0x50, 0x06, 0xb8, 0x50, 0x03, 0x4c, 0x00, 0x06, 0xa9, 0x01, 0x4c, 0x0c,
+	0x06
+])
+
+var bvs_assembled := PackedByteArray([
+	0xa9, 0x7f, 0x70, 0x07, 0x69, 0x01, 0x70, 0x03, 0x4c, 0x00, 0x06, 0xa9, 0x01, 0x4c, 0x0b, 0x06
 ])
 
 func test_beq_label_after():
@@ -144,4 +207,47 @@ func test_bcs():
 	cpu.step(2)
 	assert_int(cpu.PC).is_equal(0x60b)
 	cpu.step()
+	assert_int(cpu.A).is_equal(0x01)
+
+func test_bmi():
+	setup_assembly(bmi_str, bmi_assembled)
+	cpu.step()
+	assert_bool(cpu.negative_flag).is_false()
+	cpu.step(2)
+	assert_bool(cpu.negative_flag).is_true()
+	cpu.step(2)
+	assert_int(cpu.PC).is_equal(0x60c)
+	cpu.step()
+	assert_int(cpu.A).is_equal(0x01)
+
+func test_bpl():
+	setup_assembly(bpl_str, bpl_assembled)
+	cpu.step()
+	assert_bool(cpu.negative_flag).is_true()
+	cpu.step(2)
+	assert_bool(cpu.negative_flag).is_false()
+	cpu.step(2)
+	assert_int(cpu.PC).is_equal(0x60c)
+	assert_int(cpu.A).is_equal(0x01)
+
+func test_bvc():
+	setup_assembly(bvc_str, bvc_assembled)
+	cpu.step()
+	assert_bool(cpu.overflow_flag).is_false()
+	cpu.step()
+	assert_bool(cpu.overflow_flag).is_true()
+	cpu.step(2)
+	assert_bool(cpu.overflow_flag).is_false()
+	cpu.step(2)
+	assert_int(cpu.PC).is_equal(0x60e)
+	assert_int(cpu.A).is_equal(0x01)
+
+func test_bvs():
+	setup_assembly(bvs_str, bvs_assembled)
+	cpu.step()
+	assert_bool(cpu.overflow_flag).is_false()
+	cpu.step(2)
+	assert_bool(cpu.overflow_flag).is_true()
+	cpu.step(2)
+	assert_int(cpu.PC).is_equal(0x60d)
 	assert_int(cpu.A).is_equal(0x01)
