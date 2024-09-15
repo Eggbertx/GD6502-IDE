@@ -201,6 +201,40 @@ adc ($00),y
 adc ($00),y
 """
 
+const dec_zp_str := """
+lda #$2
+sta $1
+dec $1
+dec $1
+dec $1
+"""
+
+const dec_zpx_str := """
+lda #$2
+sta $2
+ldx #$1
+dec $1,x
+dec $1,x
+dec $1,x
+"""
+
+const dec_abs_str := """
+lda #$2
+sta $100
+dec $100
+dec $100
+dec $100
+"""
+
+const dec_absx_str := """
+lda #$2
+sta $101
+ldx #$1
+dec $100,x
+dec $100,x
+dec $100,x
+"""
+
 const sbc_imm_str = """
 lda #$50
 cld
@@ -462,6 +496,22 @@ var adc_indy_assembled := PackedByteArray([
 	0x01, 0x38, 0x71, 0x00, 0x18, 0xa9, 0x02, 0x8d, 0x02, 0x01, 0x71, 0x00, 0xa9, 0x08, 0x8d, 0x02,
 	0x01, 0xf8, 0x71, 0x00, 0x71, 0x00, 0xa9, 0x10, 0x8d, 0x02, 0x01, 0x71, 0x00, 0xd8, 0xa9, 0x01,
 	0x8d, 0x02, 0x01, 0xa9, 0xfd, 0x71, 0x00, 0x71, 0x00, 0x71, 0x00
+])
+
+var dec_zp_assembled := PackedByteArray([
+	0xa9, 0x02, 0x85, 0x01, 0xc6, 0x01, 0xc6, 0x01, 0xc6, 0x01
+])
+
+var dec_zpx_assembled := PackedByteArray([
+	0xa9, 0x02, 0x85, 0x02, 0xa2, 0x01, 0xd6, 0x01, 0xd6, 0x01, 0xd6, 0x01
+])
+
+var dec_abs_assembled := PackedByteArray([
+	0xa9, 0x02, 0x8d, 0x00, 0x01, 0xce, 0x00, 0x01, 0xce, 0x00, 0x01, 0xce, 0x00, 0x01
+])
+
+var dec_absx_assembled := PackedByteArray([
+	0xa9, 0x02, 0x8d, 0x01, 0x01, 0xa2, 0x01, 0xde, 0x00, 0x01, 0xde, 0x00, 0x01, 0xde, 0x00, 0x01
 ])
 
 var sbc_imm_assembled := PackedByteArray([
@@ -785,6 +835,58 @@ func test_adc_indy():
 	assert_int(cpu.A).is_equal(0xff)
 	cpu.step()
 	assert_int(cpu.A).is_equal(0)
+
+func test_dec_zp():
+	setup_assembly(dec_zp_str, dec_zp_assembled)
+	cpu.step(2)
+	assert_int(cpu.get_byte(1)).is_equal(0x2)
+	cpu.step()
+	assert_int(cpu.get_byte(1)).is_equal(0x1)
+	cpu.step()
+	assert_int(cpu.get_byte(1)).is_equal(0)
+	assert_bool(cpu.zero_flag).is_true()
+	cpu.step()
+	assert_int(cpu.get_byte(1)).is_equal(0xff)
+	assert_bool(cpu.zero_flag).is_false()
+
+func test_dec_zpx():
+	setup_assembly(dec_zpx_str, dec_zpx_assembled)
+	cpu.step(3)
+	assert_int(cpu.get_byte(2)).is_equal(0x2)
+	cpu.step()
+	assert_int(cpu.get_byte(2)).is_equal(0x1)
+	cpu.step()
+	assert_int(cpu.get_byte(2)).is_equal(0)
+	assert_bool(cpu.zero_flag).is_true()
+	cpu.step()
+	assert_int(cpu.get_byte(2)).is_equal(0xff)
+	assert_bool(cpu.zero_flag).is_false()
+
+func test_dec_abs():
+	setup_assembly(dec_abs_str, dec_abs_assembled)
+	cpu.step(2)
+	assert_int(cpu.get_byte(0x100)).is_equal(0x2)
+	cpu.step()
+	assert_int(cpu.get_byte(0x100)).is_equal(0x1)
+	cpu.step()
+	assert_int(cpu.get_byte(0x100)).is_equal(0)
+	assert_bool(cpu.zero_flag).is_true()
+	cpu.step()
+	assert_int(cpu.get_byte(0x100)).is_equal(0xff)
+	assert_bool(cpu.zero_flag).is_false()
+
+func test_dec_absx():
+	setup_assembly(dec_absx_str, dec_absx_assembled)
+	cpu.step(3)
+	assert_int(cpu.get_byte(0x101)).is_equal(0x2)
+	cpu.step()
+	assert_int(cpu.get_byte(0x101)).is_equal(0x1)
+	cpu.step()
+	assert_int(cpu.get_byte(0x101)).is_equal(0)
+	assert_bool(cpu.zero_flag).is_true()
+	cpu.step()
+	assert_int(cpu.get_byte(0x101)).is_equal(0xff)
+	assert_bool(cpu.zero_flag).is_false()
 
 func test_sbc_imm():
 	setup_assembly(sbc_imm_str, sbc_imm_assembled)

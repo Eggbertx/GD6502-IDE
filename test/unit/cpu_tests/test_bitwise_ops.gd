@@ -123,6 +123,99 @@ sta $201
 asl $200,x
 """
 
+const eor_imm_str := """
+lda #$55
+eor #$f
+eor #$5a
+"""
+
+const eor_zp_str := """
+lda #$f
+sta $1
+lda #$5a
+sta $2
+lda #$55
+eor $1
+eor $2
+"""
+
+const eor_zpx_str := """
+lda #$f
+ldx #$1
+sta $2
+lda #$5a
+sta $3
+lda #$55
+eor $1,x
+eor $2,x
+"""
+
+const eor_abs_str := """
+lda #$f
+sta $100
+lda #$5a
+sta $101
+lda #$55
+eor $100
+eor $101
+"""
+
+const eor_absx_str := """
+lda #$f
+ldx #$1
+sta $101
+lda #$5a
+sta $102
+lda #$55
+eor $100,x
+eor $101,x
+"""
+
+const eor_absy_str := """
+lda #$f
+ldy #$1
+sta $101
+lda #$5a
+sta $102
+lda #$55
+eor $100,y
+eor $101,y
+"""
+
+const eor_indx_str := """
+lda #$1
+sta $52
+lda #$2
+sta $54
+ldx #$1
+
+lda #$f
+sta $100
+lda #$5a
+sta $200
+
+lda #$55
+eor ($50,x)
+eor ($52,x)
+"""
+
+const eor_indy_str := """
+lda #$1
+sta $51
+lda #$2
+sta $53
+ldy #$1
+
+lda #$f
+sta $101
+lda #$5a
+sta $201
+
+lda #$55
+eor ($50),y
+eor ($51),y
+"""
+
 const lsr_accum_str := """
 lda #$84
 lsr
@@ -470,6 +563,43 @@ var asl_absx_assembled := PackedByteArray([
 	0x00, 0x02, 0xa9, 0x7f, 0x8d, 0x01, 0x02, 0x1e, 0x00, 0x02
 ])
 
+var eor_imm_assembled := PackedByteArray([
+	0xa9, 0x55, 0x49, 0x0f, 0x49, 0x5a
+])
+
+var eor_zp_assembled := PackedByteArray([
+	0xa9, 0x0f, 0x85, 0x01, 0xa9, 0x5a, 0x85, 0x02, 0xa9, 0x55, 0x45, 0x01, 0x45, 0x02
+])
+
+var eor_zpx_assembled := PackedByteArray([
+	0xa9, 0x0f, 0xa2, 0x01, 0x85, 0x02, 0xa9, 0x5a, 0x85, 0x03, 0xa9, 0x55, 0x55, 0x01, 0x55, 0x02
+])
+
+var eor_abs_assembled := PackedByteArray([
+	0xa9, 0x0f, 0x8d, 0x00, 0x01, 0xa9, 0x5a, 0x8d, 0x01, 0x01, 0xa9, 0x55, 0x4d, 0x00, 0x01, 0x4d,
+	0x01, 0x01
+])
+
+var eor_absx_assembled := PackedByteArray([
+	0xa9, 0x0f, 0xa2, 0x01, 0x8d, 0x01, 0x01, 0xa9, 0x5a, 0x8d, 0x02, 0x01, 0xa9, 0x55, 0x5d, 0x00,
+	0x01, 0x5d, 0x01, 0x01
+])
+
+var eor_absy_assembled := PackedByteArray([
+	0xa9, 0x0f, 0xa0, 0x01, 0x8d, 0x01, 0x01, 0xa9, 0x5a, 0x8d, 0x02, 0x01, 0xa9, 0x55, 0x59, 0x00,
+	0x01, 0x59, 0x01, 0x01
+])
+
+var eor_indx_assembled := PackedByteArray([
+	0xa9, 0x01, 0x85, 0x52, 0xa9, 0x02, 0x85, 0x54, 0xa2, 0x01, 0xa9, 0x0f, 0x8d, 0x00, 0x01, 0xa9,
+	0x5a, 0x8d, 0x00, 0x02, 0xa9, 0x55, 0x41, 0x50, 0x41, 0x52
+])
+
+var eor_indy_assembled := PackedByteArray([
+	0xa9, 0x01, 0x85, 0x51, 0xa9, 0x02, 0x85, 0x53, 0xa0, 0x01, 0xa9, 0x0f, 0x8d, 0x01, 0x01, 0xa9,
+	0x5a, 0x8d, 0x01, 0x02, 0xa9, 0x55, 0x51, 0x50, 0x51, 0x51
+])
+
 var lsr_accum_assembled := PackedByteArray([
 	0xa9, 0x84, 0x4a, 0x4a, 0x4a, 0x4a, 0x4a
 ])
@@ -709,6 +839,79 @@ func test_asl_absx():
 	cpu.step()
 	assert_int(cpu.get_byte(0x201)).is_equal(0xFE)
 	assert_bool(cpu.negative_flag).is_true()
+
+func test_eor_imm():
+	setup_assembly(eor_imm_str, eor_imm_assembled)
+	cpu.step()
+	assert_int(cpu.A).is_equal(0x55)
+	cpu.step()
+	assert_int(cpu.A).is_equal(0x5A)
+	assert_bool(cpu.zero_flag).is_false()
+	cpu.step()
+	assert_bool(cpu.zero_flag).is_true()
+
+func test_eor_zp():
+	setup_assembly(eor_zp_str, eor_zp_assembled)
+	cpu.step(5)
+	assert_int(cpu.A).is_equal(0x55)
+	cpu.step()
+	assert_int(cpu.A).is_equal(0x5A)
+	cpu.step()
+	assert_bool(cpu.zero_flag).is_true()
+
+func test_eor_zpx():
+	setup_assembly(eor_zpx_str, eor_zpx_assembled)
+	cpu.step(6)
+	assert_int(cpu.A).is_equal(0x55)
+	cpu.step()
+	assert_int(cpu.A).is_equal(0x5A)
+	cpu.step()
+	assert_bool(cpu.zero_flag).is_true()
+
+func test_eor_abs():
+	setup_assembly(eor_abs_str, eor_abs_assembled)
+	cpu.step(5)
+	assert_int(cpu.A).is_equal(0x55)
+	cpu.step()
+	assert_int(cpu.A).is_equal(0x5A)
+	cpu.step()
+	assert_bool(cpu.zero_flag).is_true()
+
+func test_eor_absx():
+	setup_assembly(eor_absx_str, eor_absx_assembled)
+	cpu.step(6)
+	assert_int(cpu.A).is_equal(0x55)
+	cpu.step()
+	assert_int(cpu.A).is_equal(0x5A)
+	cpu.step()
+	assert_bool(cpu.zero_flag).is_true()
+
+func test_eor_absy():
+	setup_assembly(eor_absy_str, eor_absy_assembled)
+	cpu.step(6)
+	assert_int(cpu.A).is_equal(0x55)
+	cpu.step()
+	assert_int(cpu.A).is_equal(0x5A)
+	cpu.step()
+	assert_bool(cpu.zero_flag).is_true()
+
+func test_eor_indx():
+	setup_assembly(eor_indx_str, eor_indx_assembled)
+	cpu.step(10)
+	assert_int(cpu.A).is_equal(0x55)
+	cpu.step()
+	assert_int(cpu.A).is_equal(0x5A)
+	cpu.step()
+	assert_bool(cpu.zero_flag).is_true()
+
+func test_eor_indy():
+	setup_assembly(eor_indy_str, eor_indy_assembled)
+	cpu.step(10)
+	assert_int(cpu.A).is_equal(0x55)
+	cpu.step()
+	assert_int(cpu.A).is_equal(0x5A)
+	cpu.step()
+	assert_bool(cpu.zero_flag).is_true()
 
 func test_lsr_accumulator():
 	setup_assembly(lsr_accum_str, lsr_accum_assembled)
