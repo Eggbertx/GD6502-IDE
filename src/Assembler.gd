@@ -17,6 +17,7 @@ var labeldef_re := RegEx.new()
 var program_offset_re := RegEx.new()
 var msb_re := RegEx.new()
 var lsb_re := RegEx.new()
+var comma_whitespace_re := RegEx.new()
 
 var asm_file := ""
 var asm_str := ""
@@ -57,6 +58,7 @@ func _init():
 	program_offset_re.compile(r"^\*=(\$?\w+)$")
 	msb_re.compile(r"^#>(\w+)$")
 	lsb_re.compile(r"^#<(\w+)$")
+	comma_whitespace_re.compile(r",\s+")
 	assembled = PackedByteArray()
 	logger = null
 
@@ -123,6 +125,7 @@ func clean_line(line:String) -> String:
 
 	parts.remove_at(0)
 	cleaned = opcode + " " + whitespace_re.sub(" ".join(parts), " ", true)
+	cleaned = comma_whitespace_re.sub(cleaned, ",", true)
 
 	return cleaned
 
