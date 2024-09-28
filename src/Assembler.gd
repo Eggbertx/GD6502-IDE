@@ -3,20 +3,20 @@ class_name Assembler
 const INVALID_SYNTAX = -3
 const UNDEFINED_LABEL = -4
 const INVALID_BRANCH = -5
-const unset_label = 0xFFFF # uses this as a memory address if a referenced label doesn't exist
-const start_pc = 0x600
-var current_pc = start_pc
+const UNSET_LABEL = 0xFFFF # uses this as a memory address if a referenced label doesn't exist
+const START_PC = 0x600
+var current_pc = START_PC
 
 var logger: Node
 var hexdump_logger: TextEdit
 
 var assembled: PackedByteArray
-var operand_re = RegEx.new()
-var whitespace_re = RegEx.new()
-var labeldef_re = RegEx.new()
-var program_offset_re = RegEx.new()
-var high_byte_re = RegEx.new()
-var low_byte_re = RegEx.new()
+var operand_re := RegEx.new()
+var whitespace_re := RegEx.new()
+var labeldef_re := RegEx.new()
+var program_offset_re := RegEx.new()
+var msb_re := RegEx.new()
+var lsb_re := RegEx.new()
 
 var asm_file := ""
 var asm_str := ""
@@ -34,6 +34,16 @@ var label_refs := [
 	# {"name": "labelname", "location": 0}
 ]
 
+# used for lines like lda #>labelname, with "location" referring to the position in the byte array
+var label_msb_refs := [
+	# {"name": "labelname", "location": 0}
+]
+
+# used for lines like lda #<labelname, with "location" referring to the position in the byte array
+var label_lsb_refs := [
+	# {"name": "labelname", "location": 0}
+]
+
 # used for referencing labels in branch calls, with "location" referring to the position in the byte array
 # to be replaced with the distance between the label's address and "pc"
 var relative_calls := [
@@ -41,12 +51,12 @@ var relative_calls := [
 ]
 
 func _init():
-	operand_re.compile("(\\()?(#)?(\\$)?(\\w+)(\\))?(,[xXyY])?(\\))?$")
-	whitespace_re.compile("\\s+")
-	labeldef_re.compile("^(\\w+):(.*)")
-	program_offset_re.compile("^\\*=(\\$?\\w+)$")
-	high_byte_re.compile("^#>(\\w+)$")
-	low_byte_re.compile("^#<(\\w+)$")
+	operand_re.compile(r"(\()?(#)?(\$)?(\w+)(\))?(,[xXyY])?(\))?$")
+	whitespace_re.compile(r"\s+")
+	labeldef_re.compile(r"^(\w+):(.*)")
+	program_offset_re.compile(r"^\*=(\$?\w+)$")
+	msb_re.compile(r"^#>(\w+)$")
+	lsb_re.compile(r"^#<(\w+)$")
 	assembled = PackedByteArray()
 	logger = null
 
@@ -55,18 +65,18 @@ func debug_print(debug_str):
 		return
 	logger.write_line(debug_str)
 
-func get_label_addr(labelname:String, if_unset = unset_label):
+func get_label_addr(labelname:String, if_unset = UNSET_LABEL) -> int:
 	return labels.get(labelname, if_unset)
 
 # Get the given number as a little-endian byte array, capping it at 16 bits.
 # If is_word is true, it forces the result to be a 16-bit address (returning two bytes) even if num < 0xFF
-func get_bytes(num:int, is_word = false):
+func get_bytes(num:int, is_word = false) -> Array[int]:
 	if num < 256 and not is_word:
 		return [num]
 	return [num & 0x00FF, (num & 0xFF00) >> 8]
 
 # Returns an Array. The first element is the success (anything < 0 is invalid), the rest are bytes
-func get_instruction_bytes(opcode:String, addr_mode:int, arg:int = -1):
+func get_instruction_bytes(opcode:String, addr_mode:int, arg:int = -1) -> Array[int]:
 	var op_byte = Opcodes.get_opcode_byte(opcode, addr_mode)
 	if op_byte < 0:
 		# 6502asm.com's assembler uses some nonstandard addressing
@@ -76,18 +86,19 @@ func get_instruction_bytes(opcode:String, addr_mode:int, arg:int = -1):
 
 	if op_byte < 0:
 		return []
-	var bytes = [op_byte]
+	var bytes: Array[int] = [op_byte]
 	if arg > -1:
 		bytes.append_array(get_bytes(arg))
 	return bytes
 
-func load_asm(asm_path:String):
+func load_asm(asm_path:String) -> int:
 	asm_file = asm_path
 	var file = FileAccess.open(asm_path, FileAccess.READ)
 	if file == null:
 		return FileAccess.get_open_error()
 	asm_str = file.get_as_text()
 	file.close()
+	return OK
 
 func set_logger(new_logger):
 	if new_logger.has_method("write_line"):
@@ -97,8 +108,8 @@ func set_hexdump_logger(new_hexdump_logger: TextEdit):
 	self.hexdump_logger = new_hexdump_logger
 
 # remove comments and clean excess whitespace from the given line
-func clean_line(line:String):
-	var comment_split = line.split(";", true, 1)
+func clean_line(line:String) -> String:
+	var comment_split := line.split(";", true, 1)
 	var cleaned = comment_split[0].strip_edges(true, true)
 	if cleaned == "":
 		return cleaned
@@ -116,7 +127,7 @@ func clean_line(line:String):
 	return cleaned
 
 func dcb_to_bytes(operands:String):
-	var bytes = []
+	var bytes: Array[int] = []
 	var cleaned = whitespace_re.sub(operands, "", true)
 	if cleaned == "":
 		return bytes
@@ -189,17 +200,29 @@ func assemble_line(line: String):
 		# line uses implied addressing (nop, clc, etc)
 		return append_bytes(get_instruction_bytes(parts[0], Opcodes.IMPLIED_ADDR), Opcodes.UNDEFINED_OPCODE)
 
-	if parts[0].to_lower() == "dcb":
-		# line has a dcb, example "dcb $01, $02, $15"
+	if parts[0].to_lower() == "dcb" or parts[0].to_lower() == ".byte":
+		# line is a raw set of bytes, ex: "dcb $01, $02, $15" or ".byte $01, $02, $15"
 		return append_bytes(dcb_to_bytes(operands), INVALID_SYNTAX)
 
-	matched = high_byte_re.search(operands)
+	matched = msb_re.search(operands)
 	if matched != null:
-		return append_bytes(get_instruction_bytes(opcode, Opcodes.ZERO_PAGE_ADDR), INVALID_SYNTAX)
+		# operand is getting the most significant byte of a label's address, or 0 if the label is unset
+		var label_msb := (get_label_addr(matched.strings[1], 0) & 0xFF00) >> 8
+		label_msb_refs.append({
+			"name": matched.strings[1],
+			"location": assembled.size()+1
+		})
+		return append_bytes(get_instruction_bytes(opcode, Opcodes.IMMEDIATE_ADDR, label_msb), INVALID_SYNTAX)
 
-	matched = low_byte_re.search(operands)
+	matched = lsb_re.search(operands)
 	if matched != null:
-		return append_bytes(get_instruction_bytes(opcode, Opcodes.ZERO_PAGE_ADDR), INVALID_SYNTAX)
+		# operand is getting the least significant byte of a label's address, or 0 if the label is unset
+		var label_lsb := get_label_addr(matched.strings[1], UNSET_LABEL) & 0xFF
+		label_lsb_refs.append({
+			"name": matched.strings[1],
+			"location": assembled.size()+1
+		})
+		return append_bytes(get_instruction_bytes(opcode, Opcodes.IMMEDIATE_ADDR, label_lsb), INVALID_SYNTAX)
 
 
 	matched = operand_re.search(operands)
@@ -219,7 +242,7 @@ func assemble_line(line: String):
 	var is_label = (not strings[4].is_valid_int()) and strings[3] != "$"
 	var num: int
 	if is_label:
-		num = unset_label
+		num = UNSET_LABEL
 	elif strings[3] == "$":
 		num = ("0x" + strings[4]).hex_to_int()
 	else:
@@ -306,7 +329,21 @@ func update_labels():
 		var bytes = get_bytes(labels[labelname], true)
 		assembled[location] = bytes[0]
 		assembled[location + 1] = bytes[1]
+
+	for ref in label_msb_refs:
+		var labelname = ref["name"]
+		if not labels.has(labelname):
+			continue
+		var location = ref["location"]
+		assembled[location] = (labels[labelname] & 0xFF00) >> 8
 	
+	for ref in label_lsb_refs:
+		var labelname = ref["name"]
+		if not labels.has(labelname):
+			continue
+		var location = ref["location"]
+		assembled[location] = labels[labelname] & 0xFF
+
 	for ref in relative_calls:
 		var label_addr = get_label_addr(ref["label"], -1)
 		if label_addr < 0:
@@ -320,7 +357,7 @@ func update_labels():
 	return OK
 
 func update_hexdump():
-	var dump_pc = start_pc
+	var dump_pc = START_PC
 	var dump = ""
 	for a in range(assembled.size()):
 		if (a % 16 == 0):
@@ -336,7 +373,7 @@ func _reset():
 	labels.clear()
 	label_refs.clear()
 	relative_calls.clear()
-	current_pc = start_pc
+	current_pc = START_PC
 
 
 func assemble() -> int:

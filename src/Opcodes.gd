@@ -19,7 +19,7 @@ enum {
 const INVALID_ADDRESS_MODE = -1
 const UNDEFINED_OPCODE = -2
 
-static func get_opcode_byte(opcode:String, mode:int):
+static func get_opcode_byte(opcode:String, mode:int) -> int:
 	opcode = opcode.to_upper()
 	if !dict.has(opcode):
 		return UNDEFINED_OPCODE
@@ -30,11 +30,11 @@ static func get_opcode_byte(opcode:String, mode:int):
 # Returns true if the specified opcode string refers to an instruction that uses relative addressing,
 # otherwise 16-bit addresses passed to it are stored as the 8-bit difference between that address and
 # the current PC
-static func is_relative_instruction(opcode: String):
+static func is_relative_instruction(opcode: String) -> bool:
 	return dict.has(opcode.to_upper()) and dict[opcode.to_upper()][RELATIVE_ADDR] > -1
 
 # dictionary used for basic assembly
-const dict = {
+const dict := {
 #  Opcode   IMP    ACC  ABS   ZP    IMM   ABSX  ABSY  INDX  INDY  ZPX   ZPY   REL  IND
 	"ADC": [-1,    -1,  0x6D, 0x65, 0x69, 0x7D, 0x79, 0x61, 0x71, 0x75, -1,   -1,   -1],
 	"AND": [-1,    -1,  0x2D, 0x25, 0x29, 0x3D, 0x39, 0x21, 0x31, 0x35, -1,   -1,   -1],

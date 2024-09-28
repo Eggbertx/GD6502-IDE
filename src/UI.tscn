@@ -108,18 +108,21 @@ anchor_bottom = 1.0
 offset_top = -246.0
 grow_horizontal = 2
 grow_vertical = 0
+current_tab = 0
 
 [node name="Status" parent="MainPanel/TabContainer" instance=ExtResource("4")]
 layout_mode = 2
 placeholder_text = "Load an assembly file to get started
 "
 editable = false
+metadata/_tab_index = 0
 
 [node name="Hexdump" type="TextEdit" parent="MainPanel/TabContainer"]
 visible = false
 layout_mode = 2
 theme_override_fonts/font = ExtResource("5")
 editable = false
+metadata/_tab_index = 1
 
 [node name="FindReplaceDialog" parent="." instance=ExtResource("6_aip3c")]
 initial_position = 1
