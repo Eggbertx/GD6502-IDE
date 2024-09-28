@@ -112,19 +112,19 @@ func set_hexdump_logger(new_hexdump_logger: TextEdit):
 # remove comments and clean excess whitespace from the given line
 func clean_line(line:String) -> String:
 	var comment_split := line.split(";", true, 1)
-	var cleaned = comment_split[0].strip_edges(true, true)
+	var cleaned := comment_split[0].strip_edges(true, true)
 	if cleaned == "":
 		return cleaned
 
 	cleaned = whitespace_re.sub(cleaned, " ") # remove excess whitespace
-	var parts = cleaned.split(" ", true)
-	var opcode = parts[0].strip_edges(true, true)
+	var parts := cleaned.split(" ", true)
+	var instruction := parts[0].strip_edges(true, true)
 
 	if parts.size() == 1:
-		return opcode # no operands
+		return instruction # no operands
 
 	parts.remove_at(0)
-	cleaned = opcode + " " + whitespace_re.sub(" ".join(parts), " ", true)
+	cleaned = instruction + " " + whitespace_re.sub(" ".join(parts), " ", true)
 	cleaned = comma_whitespace_re.sub(cleaned, ",", true)
 
 	return cleaned
@@ -196,15 +196,17 @@ func assemble_line(line: String):
 			return OK
 	
 	var parts = cleaned.split(" ", true, 1)
-	var opcode = parts[0]
-	var operands = cleaned.substr(opcode.length() + 1)
+	var instruction = parts[0].to_lower()
+	var operands = cleaned.substr(instruction.length() + 1)
 
-	if parts.size() == 1:
+	if parts.size() == 1 and instruction not in ["dcb",".byte"]:
 		# line uses implied addressing (nop, clc, etc)
-		return append_bytes(get_instruction_bytes(parts[0], Opcodes.IMPLIED_ADDR), Opcodes.UNDEFINED_OPCODE)
+		return append_bytes(get_instruction_bytes(instruction, Opcodes.IMPLIED_ADDR), Opcodes.UNDEFINED_OPCODE)
 
-	if parts[0].to_lower() == "dcb" or parts[0].to_lower() == ".byte":
+	if instruction == "dcb" or instruction == ".byte":
 		# line is a raw set of bytes, ex: "dcb $01, $02, $15" or ".byte $01, $02, $15"
+		if operands == "":
+			return OK
 		return append_bytes(dcb_to_bytes(operands), INVALID_SYNTAX)
 
 	matched = msb_re.search(operands)
@@ -215,7 +217,7 @@ func assemble_line(line: String):
 			"name": matched.strings[1],
 			"location": assembled.size()+1
 		})
-		return append_bytes(get_instruction_bytes(opcode, Opcodes.IMMEDIATE_ADDR, label_msb), INVALID_SYNTAX)
+		return append_bytes(get_instruction_bytes(instruction, Opcodes.IMMEDIATE_ADDR, label_msb), INVALID_SYNTAX)
 
 	matched = lsb_re.search(operands)
 	if matched != null:
@@ -225,7 +227,7 @@ func assemble_line(line: String):
 			"name": matched.strings[1],
 			"location": assembled.size()+1
 		})
-		return append_bytes(get_instruction_bytes(opcode, Opcodes.IMMEDIATE_ADDR, label_lsb), INVALID_SYNTAX)
+		return append_bytes(get_instruction_bytes(instruction, Opcodes.IMMEDIATE_ADDR, label_lsb), INVALID_SYNTAX)
 
 
 	matched = operand_re.search(operands)
@@ -240,7 +242,7 @@ func assemble_line(line: String):
 			value = ("0x" + strings[4]).hex_to_int()
 		else:
 			value = strings[4].to_int()
-		return append_bytes(get_instruction_bytes(opcode, Opcodes.IMMEDIATE_ADDR, value))
+		return append_bytes(get_instruction_bytes(instruction, Opcodes.IMMEDIATE_ADDR, value))
 
 	var is_label = (not strings[4].is_valid_int()) and strings[3] != "$"
 	var num: int
@@ -290,7 +292,7 @@ func assemble_line(line: String):
 			mode = Opcodes.ZERO_PAGE_Y_ADDR
 	elif num > 0xFF or is_label:
 		# ex: $ff00
-		if Opcodes.is_relative_instruction(opcode):
+		if Opcodes.is_relative_instruction(instruction):
 			mode = Opcodes.RELATIVE_ADDR
 			num = 0xFF
 		else:
@@ -303,7 +305,7 @@ func assemble_line(line: String):
 		print_debug("Error code %d on line: %s" % [mode, cleaned])
 		return mode
 
-	var status = append_bytes(get_instruction_bytes(opcode, mode, num), Opcodes.INVALID_ADDRESS_MODE)
+	var status = append_bytes(get_instruction_bytes(instruction, mode, num), Opcodes.INVALID_ADDRESS_MODE)
 	if status < 0:
 		print_debug("Invalid addressing mode on line: %s" % line)
 		return status
