@@ -38,6 +38,7 @@ settings/test/test_discovery=true
 ui/inspector/node_collapse=false
 ui/inspector/tree_sort_mode=1
 ui/inspector/tree_view_mode=1
+ui/toolbar/run_overall=true
 
 [physics]
 
