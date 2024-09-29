@@ -11,7 +11,7 @@ var cpu: ExampleCPUVariant:
 		return $CPU
 
 var asm := Assembler.new()
-var executions_per_physics_process := 910
+var executions_per_physics_process := 91
 var debugging := false
 # var max_wait_time := 1.0/60.0
 # var wait_time: float = 0.0
