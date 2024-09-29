@@ -71,13 +71,13 @@ func open_goto():
 	$GoToAddressDialog.visible = true
 
 func file_menu_selected(id):
-	emit_signal("file_item_selected", id)
+	file_item_selected.emit(id)
 
 func emulator_menu_selected(id):
-	emit_signal("emulator_item_selected", id)
+	emulator_item_selected.emit(id)
 
 func help_menu_selected(id):
-	emit_signal("help_item_selected", id)
+	help_item_selected.emit(id)
 
 func hide_screen():
 	screen.hide()
@@ -110,7 +110,7 @@ func update_register_info(a: int, x: int, y: int, pc: int, sp: int, flags: int):
 func _on_FileDialog_file_selected(path):
 	loaded_file = path
 	if path != "":
-		emit_signal("file_selected", path)
+		file_selected.emit(path)
 
 func _on_FileDialog_hide():
 	loaded_file = ""

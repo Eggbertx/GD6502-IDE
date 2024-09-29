@@ -17,5 +17,6 @@ script = ExtResource("3_2tisc")
 [connection signal="file_selected" from="UI" to="." method="open_rom"]
 [connection signal="help_item_selected" from="UI" to="." method="_on_ui_help_item_selected"]
 [connection signal="cpu_reset" from="CPU" to="." method="_on_cpu_cpu_reset"]
+[connection signal="illegal_opcode" from="CPU" to="." method="_on_cpu_illegal_opcode"]
 [connection signal="status_changed" from="CPU" to="." method="_on_CPU_status_changed"]
 [connection signal="watched_memory_changed" from="CPU" to="." method="_on_cpu_watched_memory_changed"]

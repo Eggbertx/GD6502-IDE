@@ -6,12 +6,12 @@ const SETTINGS_PATH = "user://settings.save"
 @onready var logger:TextEdit = $UI/MainPanel/TabContainer/Status
 @onready var screen:Screen = $UI/MainPanel/Screen
 @onready var ui:UI = $UI
-var cpu: CPU:
+var cpu: ExampleCPUVariant:
 	get:
 		return $CPU
 
-var asm: Assembler
-var executions_per_physics_process := 91
+var asm := Assembler.new()
+var executions_per_physics_process := 910
 var debugging := false
 # var max_wait_time := 1.0/60.0
 # var wait_time: float = 0.0
@@ -20,7 +20,6 @@ func _ready():
 	get_window().min_size = Vector2i(480, 560)
 	load_settings()
 	cpu.watched_ranges.append([0x200, 0x5ff])
-	asm = Assembler.new()
 	asm.set_logger(logger)
 	asm.set_hexdump_logger($UI/MainPanel/TabContainer/Hexdump)
 	var args = OS.get_cmdline_args()
@@ -58,7 +57,7 @@ func load_settings():
 
 	var file := FileAccess.open(SETTINGS_PATH, FileAccess.READ)
 	if file == null:
-		$UI.log_print("Failed loading settings: %" % FileAccess.get_open_error())
+		ui.log_print("Failed loading settings: %" % FileAccess.get_open_error())
 		return
 
 	get_window().mode = Window.MODE_MAXIMIZED if (file.get_var()) else Window.MODE_WINDOWED
@@ -82,16 +81,16 @@ func update_register_label():
 	$UI.update_register_info(cpu.A, cpu.X, cpu.Y, cpu.PC, cpu.SP, cpu.flags)
 
 func open_rom(path: String):
-	$UI.log_print("Loading file: %s" % path)
-	$UI.log_line()
+	ui.log_print("Loading file: %s" % path)
+	ui.log_line()
 	cpu.memory.resize(cpu.pc_start)
 	var file := FileAccess.open(path, FileAccess.READ)
 	if file == null:
-		$UI.log_print("Got error code %d while loading %s" % [FileAccess.get_open_error(), path])
+		ui.log_print("Got error code %d while loading %s" % [FileAccess.get_open_error(), path])
 		return
 
 	asm.asm_str = file.get_as_text()
-	$UI.set_assembly_source(asm.asm_str)
+	ui.set_assembly_source(asm.asm_str)
 	file.close()
 	var success: bool = assemble_code() == OK
 	enable_emulation(success)
@@ -107,9 +106,9 @@ func enable_emulation(enabled: bool):
 func _on_ui_file_item_selected(id: int):
 	match id:
 		Menus.FILE_OPEN_FILE:
-			$UI.open_file_dialog(false)
+			ui.open_file_dialog(false)
 		Menus.FILE_OPEN_EXAMPLE:
-			$UI.open_file_dialog(true)
+			ui.open_file_dialog(true)
 		Menus.FILE_EXIT:
 			get_tree().quit(0)
 
@@ -193,3 +192,7 @@ func _on_cpu_cpu_reset():
 func _on_cpu_watched_memory_changed(location:int, new_val:int):
 	if location >= 0x200 and location <= 0x5ff:
 		screen.set_pixel_col(location-0x200, new_val & 0xf)
+
+func _on_cpu_illegal_opcode(opcode: int) -> void:
+	ui.log_print("Unhandled opcode: $%02X at PC %04X" % [opcode, cpu.PC])
+	cpu.set_status(CPU.status.STOPPED, true)
