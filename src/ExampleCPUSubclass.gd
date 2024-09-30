@@ -1,7 +1,12 @@
-class_name ExampleCPUVariant
+class_name ExampleCPUSubclass
 extends CPU
 
 var _current_key := 0
+
+func _setup_specs():
+	memory_size = 0x5ff
+	sp_start = 0xff
+	pc_start = 0x600
 
 func get_byte(addr: int) -> int:
 	match addr:

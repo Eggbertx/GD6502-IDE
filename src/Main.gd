@@ -6,7 +6,7 @@ const SETTINGS_PATH = "user://settings.save"
 @onready var logger:TextEdit = $UI/MainPanel/TabContainer/Status
 @onready var screen:Screen = $UI/MainPanel/Screen
 @onready var ui:UI = $UI
-var cpu: ExampleCPUVariant:
+var cpu: ExampleCPUSubclass:
 	get:
 		return $CPU
 
