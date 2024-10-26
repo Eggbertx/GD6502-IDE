@@ -1,10 +1,11 @@
 class_name CPUTestBase
 extends GdUnitTestSuite
 
-var cpu := CPU.new()
+var cpu := ExampleCPUSubclass.new()
 var asm := Assembler.new()
 
 func before():
+	asm.logger = StringLogger.new()
 	auto_free(cpu)
 	auto_free(asm)
 
