@@ -21,3 +21,9 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventKey:
 		var ke := event as InputEventKey
 		_current_key = ke.unicode & 0xff
+
+
+func step(steps:int = 1):
+	_status = status.PAUSED
+	for s in range(steps):
+		execute(true)
