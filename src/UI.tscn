@@ -130,6 +130,7 @@ visible = false
 
 [connection signal="file_selected" from="FileDialog" to="." method="_on_FileDialog_file_selected"]
 [connection signal="confirmed" from="GoToAddressDialog" to="." method="_on_GoToAddressDialog_confirmed"]
+[connection signal="clicked" from="MainPanel/Screen" to="." method="_on_screen_clicked"]
 [connection signal="clear_search_triggered" from="MainPanel/AssemblyCodeEdit" to="." method="_on_assembly_code_edit_clear_search_triggered"]
 [connection signal="find_triggered" from="MainPanel/AssemblyCodeEdit" to="." method="_on_assembly_code_edit_find_triggered"]
 [connection signal="tab_changed" from="MainPanel/TabContainer" to="." method="_on_tab_container_tab_changed"]

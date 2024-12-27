@@ -9,6 +9,8 @@ const palette = [
 	Color("#777777"), Color("#aaff66"), Color("#0088ff"), Color("#bbbbbb")
 ]
 
+signal clicked
+
 # 32x32, or 1024
 const num_pixels = 0x400
 var img := Image.create(32, 32, true, Image.FORMAT_RGB8)
@@ -39,3 +41,9 @@ func _process(_delta):
 func clear():
 	img.fill(palette[0])
 	needs_update = true
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		var me := event as InputEventMouseButton
+		if me.pressed:
+			clicked.emit()

@@ -140,3 +140,6 @@ func _on_find_replace_dialog_cancelled():
 
 func _on_assembly_code_edit_clear_search_triggered():
 	code_edit.delete_selection()
+
+func _on_screen_clicked() -> void:
+	code_edit.release_focus()
