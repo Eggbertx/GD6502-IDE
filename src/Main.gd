@@ -35,12 +35,6 @@ func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST or what == NOTIFICATION_EXIT_TREE:
 		save_settings()
 
-func _physics_process(_delta):
-	if cpu.get_status() != CPU.status.RUNNING:
-		return
-	for i in range(executions_per_physics_process):
-		run_cpu()
-
 func save_settings():
 	var file := FileAccess.open(SETTINGS_PATH, FileAccess.WRITE)
 	if file == null:
