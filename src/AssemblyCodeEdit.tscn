@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://btd2ochiefc4p"]
 
-[ext_resource type="Script" path="res://src/AssemblyCodeEdit.gd" id="1_xxy3y"]
+[ext_resource type="Script" uid="uid://bw7303ldf0dro" path="res://src/AssemblyCodeEdit.gd" id="1_xxy3y"]
 [ext_resource type="FontFile" path="res://assets/NotoSansMonoRegular.tres" id="2"]
 
 [sub_resource type="CodeHighlighter" id="CodeHighlighter_dorh2"]

@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://de851dmqya5ph"]
 
-[ext_resource type="Script" path="res://src/Screen.gd" id="1"]
+[ext_resource type="Script" uid="uid://cyaqs43sbbgii" path="res://src/Screen.gd" id="1"]
 
 [node name="Screen" type="TextureRect"]
 anchors_preset = -1
