@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://cee2th485uviv"]
 
-[ext_resource type="Script" path="res://src/GoToAddress.gd" id="1"]
+[ext_resource type="Script" uid="uid://dil6r6fxp18wv" path="res://src/GoToAddress.gd" id="1"]
 
 [node name="GoToAddressDialog" type="ConfirmationDialog"]
 script = ExtResource("1")

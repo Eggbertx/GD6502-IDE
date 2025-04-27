@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://be0q61aecxaq7"]
 
-[ext_resource type="Script" path="res://src/FindReplaceDialog.gd" id="1_0selc"]
+[ext_resource type="Script" uid="uid://bwq2ejjqkexsc" path="res://src/FindReplaceDialog.gd" id="1_0selc"]
 
 [node name="FindReplaceDialog" type="Window"]
 title = "Find/Replace text"

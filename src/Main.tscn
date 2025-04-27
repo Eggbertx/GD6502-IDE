@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://c47henxksh20r"]
 
-[ext_resource type="Script" path="res://src/Main.gd" id="1"]
-[ext_resource type="Script" path="res://src/ExampleCPUSubclass.gd" id="3_2tisc"]
+[ext_resource type="Script" uid="uid://dl7ba4wqqb04e" path="res://src/Main.gd" id="1"]
+[ext_resource type="Script" uid="uid://12t5v153vvo" path="res://src/ExampleCPUSubclass.gd" id="3_2tisc"]
 [ext_resource type="PackedScene" uid="uid://cikoitjwng02w" path="res://src/UI.tscn" id="5"]
 
 [node name="Main" type="Node"]

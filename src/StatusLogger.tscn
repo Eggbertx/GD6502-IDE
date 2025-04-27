@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://be0aqcaj5wour"]
 
-[ext_resource type="Script" path="res://src/StatusLogger.gd" id="1"]
+[ext_resource type="Script" uid="uid://jku12yrxkc5x" path="res://src/StatusLogger.gd" id="1"]
 [ext_resource type="FontFile" path="res://assets/NotoSansMonoRegular.tres" id="2"]
 
 [node name="StatusLogger" type="TextEdit"]
