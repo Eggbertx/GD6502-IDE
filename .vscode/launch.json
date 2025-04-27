@@ -14,14 +14,18 @@
             "project": "${workspaceFolder}",
             "port": 6007,
             "address": "127.0.0.1",
-            "launch_game_instance": true,
-            "launch_scene": false
         },
         {
-            "name": "Launch GUT (Godot Unit Testing)",
+            "name": "Run gdUnit4 tests (Linux/macOS)",
             "type": "f5anything",
             "request": "launch",
-            "command": "godot --debug-collisions --path ${workspaceFolder} -d -s addons/gut/gut_cmdln.gd"
+            "command": "GODOT_BIN=godot ./addons/gdUnit4/runtest.sh -a ${workspaceFolder}/test/unit/"
+        },
+        {
+            "name": "Run gdUnit4 tests (Windows)",
+            "type": "f5anything",
+            "request": "launch",
+            "command": "GODOT_BIN=godot ./addons/gdUnit4/runtest.bat -a ${workspaceFolder}/test/unit/"
         }
     ]
 }

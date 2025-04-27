@@ -44,5 +44,3 @@ func test_lda():
 	assert_int(cpu.A).is_equal(0x02)
 	cpu.step()
 	assert_int(cpu.A).is_equal(0x04)
-
-

@@ -1,7 +1,7 @@
 class_name CPUTestBase
 extends GdUnitTestSuite
 
-var cpu := ExampleCPUSubclass.new(false)
+var cpu := ExampleCPUSubclass.new()
 var asm := Assembler.new()
 
 func before():
