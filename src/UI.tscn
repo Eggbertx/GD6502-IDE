@@ -50,7 +50,6 @@ switch_on_hover = true
 [node name="FileDialog" type="FileDialog" parent="."]
 initial_position = 1
 size = Vector2i(500, 400)
-ok_button_text = "Save"
 show_hidden_files = true
 
 [node name="GoToAddressDialog" parent="." instance=ExtResource("3")]

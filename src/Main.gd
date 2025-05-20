@@ -33,6 +33,7 @@ func _input(event):
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST or what == NOTIFICATION_EXIT_TREE:
+		cpu.unlock()
 		save_settings()
 
 func save_settings():

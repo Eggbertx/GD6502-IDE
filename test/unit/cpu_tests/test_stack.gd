@@ -87,27 +87,6 @@ var php_plp_assembled := PackedByteArray([
 	0xa9, 0x00, 0x08, 0x08, 0xa9, 0x01, 0x28, 0x28, 0x28 
 ])
 
-var filled := false
-var emptied := false
-
-func on_filled():
-	filled = true
-
-func on_emptied():
-	emptied = true
-
-func before():
-	super()
-	if not cpu.stack_filled.is_connected(on_filled):
-		cpu.stack_filled.connect(on_filled)
-	if not cpu.stack_emptied.is_connected(on_emptied):
-		cpu.stack_emptied.connect(on_emptied)
-
-func before_test():
-	super()
-	filled = false
-	emptied = false
-
 
 func test_jsr():
 	setup_assembly(jsr_str, jsr_assembled)
@@ -119,9 +98,9 @@ func test_jsr():
 func test_jsr_wrap():
 	setup_assembly(jsr_stack_filled_str, jsr_stack_filled_assembled)
 	cpu.step(127)
-	assert_bool(filled).is_false()
+	assert_signal(cpu).is_not_emitted("stack_filled")
 	cpu.step()
-	assert_bool(filled).is_true()
+	assert_signal(cpu).is_emitted("stack_filled")
 	
 func test_rts():
 	setup_assembly(rts_str, rts_assembled)
@@ -140,9 +119,9 @@ func test_rts_empty():
 	cpu.step()
 	assert_int(cpu.PC).is_equal(0x604)
 	cpu.step()
-	assert_bool(emptied).is_false()
+	assert_signal(cpu).is_not_emitted("stack_emptied")
 	cpu.step()
-	assert_bool(emptied).is_true()
+	assert_signal(cpu).is_emitted("stack_emptied")
 
 func test_pha_pla():
 	setup_assembly(pha_pla_str, pha_pla_assembled)
@@ -157,9 +136,9 @@ func test_pha_pla():
 	assert_int(cpu.A).is_equal(4)
 	assert_int(cpu.SP).is_equal(0xfe)
 	cpu.step()
-	assert_bool(emptied).is_false()
+	assert_signal(cpu).is_not_emitted("stack_emptied")
 	cpu.step()
-	assert_bool(emptied).is_true()
+	assert_signal(cpu).is_emitted("stack_emptied")
 
 func test_txs_tsx():
 	setup_assembly(txs_tsx_str, txs_tsx_assembled)
@@ -181,6 +160,6 @@ func test_php_plp():
 	assert_flag(cpu.flag_bit.ZERO).is_false()
 	cpu.step()
 	assert_flag(cpu.flag_bit.ZERO).is_true()
-	assert_bool(emptied).is_false()
+	assert_signal(cpu).is_not_emitted("stack_emptied")
 	cpu.step(2)
-	assert_bool(emptied).is_true()
+	assert_signal(cpu).is_emitted("stack_emptied")

@@ -26,8 +26,9 @@ func _ready():
 func set_pixel_col(index:int, color:int):
 	var x := index % 32
 	var y := floori(index / 32.0)
-	img.set_pixel(x, y, palette[color & 0xf])
-	needs_update = true
+	if img.get_pixel(x, y) != palette[color & 0xf]:
+		img.set_pixel(x, y, palette[color & 0xf])
+		needs_update = true
 
 func _draw():
 	if needs_update:
