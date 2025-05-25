@@ -13,9 +13,6 @@ func before_test():
 	cpu.unload_rom()
 	cpu.reset()
 
-func after():
-	cpu.unlock()
-
 ## setup_assembly loads the assembly string into the assembler, assembles it, and asserts that the assembly succeeded. It then
 ## asserts that the assembled bytecode was expected, and loads it into the CPU
 func setup_assembly(asm_str: String, expect_bytes: PackedByteArray):
