@@ -12,10 +12,7 @@ var cpu: ExampleCPUSubclass:
 		return emu_mgr.cpu
 
 var asm := Assembler.new()
-var executions_per_physics_process := 91
 var debugging := false
-# var max_wait_time := 1.0/60.0
-# var wait_time: float = 0.0
 
 func _ready():
 	get_window().min_size = Vector2i(480, 560)
@@ -72,7 +69,7 @@ func assemble_code():
 	screen.clear()
 	return success
 
-func start_emulation(force = false):
+func start_emulation():
 	emu_mgr.start()
 	if debugging:
 		update_register_label()
