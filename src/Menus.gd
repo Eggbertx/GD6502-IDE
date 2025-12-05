@@ -22,7 +22,6 @@ static var emulator_items: Array[Dictionary] = [
 	{"type": "text", "text": "Stop"},
 	{"type": "separator"},
 	{"type": "text", "text": "Step Forward", "accelerator": KEY_MASK_CTRL | KEY_PERIOD},
-	{"type": "text", "text": "Step Back", "accelerator": KEY_MASK_CTRL | KEY_COMMA},
 	{"type": "text", "text": "Go To Address"},
 	{"type": "separator"},
 	{"type": "text", "text": "Clear Log"},
@@ -73,7 +72,6 @@ enum {
 	EMULATOR_STOP,
 	EMULATOR_SEPARATOR1,
 	EMULATOR_STEP_FORWARD,
-	EMULATOR_STEP_BACK,
 	EMULATOR_GOTO,
 	EMULATOR_SEPARATOR2,
 	EMULATOR_CLEAR_LOG

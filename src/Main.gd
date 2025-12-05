@@ -21,8 +21,6 @@ func _ready():
 	get_window().min_size = Vector2i(480, 560)
 	load_settings()
 	cpu.watched_ranges.append([0x200, 0x5ff])
-	cpu.watched_memory_changed.connect(_on_cpu_watched_memory_changed)
-	cpu.illegal_opcode.connect(_on_cpu_illegal_opcode)
 
 	asm.set_logger(logger)
 	asm.set_hexdump_logger($UI/MainPanel/TabContainer/Hexdump)
@@ -139,17 +137,15 @@ func _on_ui_emulator_item_selected(id: int):
 		Menus.EMULATOR_PAUSED:
 			var status = emulator.get_status()
 			if status == CPU.EmulationStatus.RUNNING:
-				# ui.emulator_menu.set_item_checked(Menus.EMULATOR_PAUSED, true)
+				ui.emulator_menu.set_item_checked(Menus.EMULATOR_PAUSED, true)
 				emulator.set_status(CPU.EmulationStatus.PAUSED)
 			elif status == CPU.EmulationStatus.PAUSED:
 				emulator.set_status(CPU.EmulationStatus.RUNNING)
-				# ui.emulator_menu.set_item_checked(Menus.EMULATOR_PAUSED, false)
+				ui.emulator_menu.set_item_checked(Menus.EMULATOR_PAUSED, false)
 		Menus.EMULATOR_STEP_FORWARD:
 			logger.write_line("Stepping forward")
 			emulator.set_status(CPU.EmulationStatus.PAUSED)
 			run_cpu(true)
-		Menus.EMULATOR_STEP_BACK:
-			logger.write_line("Stepping back")
 		Menus.EMULATOR_STOP:
 			emulator.reset(CPU.EmulationStatus.STOPPED)
 		Menus.EMULATOR_GOTO:
