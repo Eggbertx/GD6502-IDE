@@ -25,4 +25,6 @@ metadata/_custom_type_script = "uid://12t5v153vvo"
 [connection signal="emulator_reset" from="EmulatorManager" to="." method="_on_emulator_manager_emulator_reset"]
 [connection signal="status_changed" from="EmulatorManager" to="." method="_on_emulator_manager_status_changed"]
 [connection signal="illegal_opcode" from="EmulatorManager/CPU" to="." method="_on_cpu_illegal_opcode"]
+[connection signal="stack_emptied" from="EmulatorManager/CPU" to="." method="_on_cpu_stack_emptied"]
+[connection signal="stack_filled" from="EmulatorManager/CPU" to="." method="_on_cpu_stack_filled"]
 [connection signal="watched_memory_changed" from="EmulatorManager/CPU" to="." method="_on_cpu_watched_memory_changed"]

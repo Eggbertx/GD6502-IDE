@@ -198,3 +198,11 @@ func _on_emulator_manager_status_changed(new_status: CPU.EmulationStatus, old_st
 				logger.write_line("Pausing emulator")
 		CPU.EmulationStatus.END:
 			logger.write_line("Program end at PC=$%04X" % cpu.PC)
+
+
+func _on_cpu_stack_filled() -> void:
+	logger.write_line("6502 stack filled")
+
+
+func _on_cpu_stack_emptied() -> void:
+	logger.write_line("6502 stack empty")
