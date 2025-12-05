@@ -13,15 +13,13 @@
             "request": "launch",
             "project": "${workspaceFolder}",
             "port": 6007,
-            "address": "127.0.0.1",
-            "launch_game_instance": true,
-            "launch_scene": false
+            "address": "127.0.0.1"
         },
         {
-            "name": "Launch GUT (Godot Unit Testing)",
+            "name": "Launch gdUnit4",
             "type": "f5anything",
             "request": "launch",
-            "command": "godot --debug-collisions --path ${workspaceFolder} -d -s addons/gut/gut_cmdln.gd"
+            "command": "./addons/gdUnit4/runtest.sh --godot_binary /usr/bin/godot -a ./test/unit/"
         }
     ]
 }

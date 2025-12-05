@@ -6,9 +6,10 @@ const SETTINGS_PATH = "user://settings.save"
 @onready var logger:TextEdit = $UI/MainPanel/TabContainer/Status
 @onready var screen:Screen = $UI/MainPanel/Screen
 @onready var ui:UI = $UI
+@onready var emulator:EmulatorManager = $EmulatorManager
 var cpu: ExampleCPUSubclass:
 	get:
-		return $CPU
+		return $EmulatorManager/CPU
 
 var asm := Assembler.new()
 var executions_per_physics_process := 91
@@ -20,23 +21,26 @@ func _ready():
 	get_window().min_size = Vector2i(480, 560)
 	load_settings()
 	cpu.watched_ranges.append([0x200, 0x5ff])
+	cpu.watched_memory_changed.connect(_on_cpu_watched_memory_changed)
+	cpu.illegal_opcode.connect(_on_cpu_illegal_opcode)
+
 	asm.set_logger(logger)
 	asm.set_hexdump_logger($UI/MainPanel/TabContainer/Hexdump)
 	var args = OS.get_cmdline_args()
-	if args.size() > 1:
+	if args.size() == 2 and args[0] == "--asm":
 		open_rom(args[1])
 
 func _input(event):
 	if event is InputEventKey:
-		if cpu.get_status() == cpu.status.RUNNING and cpu.memory.size() >= 0xFF:
-			cpu.memory[0xFF] = event.keycode & 0xFF
+		if emulator.get_status() == CPU.EmulationStatus.RUNNING and emulator.cpu.memory.size() >= 0xFF:
+			emulator.cpu.memory[0xFF] = event.keycode & 0xFF
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST or what == NOTIFICATION_EXIT_TREE:
 		save_settings()
 
 func _physics_process(_delta):
-	if cpu.get_status() != CPU.status.RUNNING:
+	if emulator.get_status() != CPU.EmulationStatus.RUNNING:
 		return
 	for i in range(executions_per_physics_process):
 		run_cpu()
@@ -67,7 +71,7 @@ func load_settings():
 func assemble_code():
 	var success = asm.assemble()
 	asm.update_hexdump()
-	cpu.reset()
+	emulator.reset()
 	$UI/MainPanel/TabContainer.current_tab = 0
 	screen.clear()
 	return success
@@ -95,12 +99,11 @@ func open_rom(path: String):
 	var success: bool = assemble_code() == OK
 	enable_emulation(success)
 	if success:
-		cpu.reset(cpu.status.STOPPED)
-		# run_cpu()
+		emulator.reset(CPU.EmulationStatus.STOPPED)
 
 func enable_emulation(enabled: bool):
 	if enabled:
-		cpu.load_rom(asm.assembled)
+		emulator.load_rom(asm.assembled)
 	ui.set_emulation_menu_items_enabled(enabled)
 
 func _on_ui_file_item_selected(id: int):
@@ -121,34 +124,34 @@ func _on_ui_emulator_item_selected(id: int):
 			asm.asm_str = ui.code_edit.text
 			if assemble_code() == OK:
 				enable_emulation(true)
-				cpu.set_status(CPU.status.RUNNING)
+				emulator.set_status(CPU.EmulationStatus.RUNNING)
 				run_cpu()
 				debugging = false	
 		Menus.EMULATOR_START:
-			cpu.set_status(CPU.status.RUNNING)
+			emulator.set_status(CPU.EmulationStatus.RUNNING)
 			run_cpu()
 			debugging = false
 			ui.register_label.text = ""
 		Menus.EMULATOR_DEBUG:
-			cpu.set_status(CPU.status.RUNNING)
+			emulator.set_status(CPU.EmulationStatus.RUNNING)
 			run_cpu()
 			debugging = true
 		Menus.EMULATOR_PAUSED:
-			var status = cpu.get_status()
-			if status == CPU.status.RUNNING:
+			var status = emulator.get_status()
+			if status == CPU.EmulationStatus.RUNNING:
 				# ui.emulator_menu.set_item_checked(Menus.EMULATOR_PAUSED, true)
-				cpu.set_status(CPU.status.PAUSED)
-			elif status == CPU.status.PAUSED:
-				cpu.set_status(CPU.status.RUNNING)
+				emulator.set_status(CPU.EmulationStatus.PAUSED)
+			elif status == CPU.EmulationStatus.PAUSED:
+				emulator.set_status(CPU.EmulationStatus.RUNNING)
 				# ui.emulator_menu.set_item_checked(Menus.EMULATOR_PAUSED, false)
 		Menus.EMULATOR_STEP_FORWARD:
 			logger.write_line("Stepping forward")
-			cpu.set_status(CPU.status.PAUSED)
+			emulator.set_status(CPU.EmulationStatus.PAUSED)
 			run_cpu(true)
 		Menus.EMULATOR_STEP_BACK:
 			logger.write_line("Stepping back")
 		Menus.EMULATOR_STOP:
-			cpu.reset(CPU.status.STOPPED)
+			emulator.reset(CPU.EmulationStatus.STOPPED)
 		Menus.EMULATOR_GOTO:
 			$UI/GoToAddressDialog.show()
 		Menus.EMULATOR_CLEAR_LOG:
@@ -165,34 +168,37 @@ func _on_ui_help_item_selected(id: int):
 		Menus.HELP_EASY6502:
 			OS.shell_open("https://skilldrick.github.io/easy6502/")
 
-func _on_CPU_status_changed(new_status: CPU.status, old_status: int) -> void:
-	update_register_label()
-	if logger == null:
-		return
-	match new_status:
-		CPU.status.STOPPED:
-			logger.write_line("Stopping emulator")
-		CPU.status.RUNNING:
-			if old_status == CPU.status.PAUSED:
-				logger.write_line("Unpausing emulator")
-			else:
-				logger.write_line("Starting emulator")
-		CPU.status.PAUSED:
-			if old_status == CPU.status.RUNNING:
-				logger.write_line("Pausing emulator")
-		CPU.status.END:
-			logger.write_line("Program end at PC=$%04X" % cpu.PC)
-
-
-func _on_cpu_cpu_reset():
-	update_register_label()
-	if screen != null:
-		screen.clear()
 
 func _on_cpu_watched_memory_changed(location:int, new_val:int):
 	if location >= 0x200 and location <= 0x5ff:
 		screen.set_pixel_col(location-0x200, new_val & 0xf)
 
+
 func _on_cpu_illegal_opcode(opcode: int) -> void:
 	ui.log_print("Unhandled opcode: $%02X at PC %04X" % [opcode, cpu.PC])
-	cpu.set_status(CPU.status.STOPPED, true)
+	emulator.set_status(CPU.EmulationStatus.STOPPED, true)
+
+
+func _on_emulator_manager_emulator_reset() -> void:
+	update_register_label()
+	if screen != null:
+		screen.clear()
+
+
+func _on_emulator_manager_status_changed(new_status: CPU.EmulationStatus, old_status: CPU.EmulationStatus) -> void:
+	update_register_label()
+	if logger == null:
+		return
+	match new_status:
+		CPU.EmulationStatus.STOPPED:
+			logger.write_line("Stopping emulator")
+		CPU.EmulationStatus.RUNNING:
+			if old_status == CPU.EmulationStatus.PAUSED:
+				logger.write_line("Unpausing emulator")
+			else:
+				logger.write_line("Starting emulator")
+		CPU.EmulationStatus.PAUSED:
+			if old_status == CPU.EmulationStatus.RUNNING:
+				logger.write_line("Pausing emulator")
+		CPU.EmulationStatus.END:
+			logger.write_line("Program end at PC=$%04X" % cpu.PC)

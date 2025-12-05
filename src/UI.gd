@@ -97,13 +97,13 @@ func log_line():
 func update_register_info(a: int, x: int, y: int, pc: int, sp: int, flags: int):
 	$MainPanel/RegisterInfo.parse_bbcode(register_label_format % [
 		a, x, y, pc, sp,
-		"green" if (flags & CPU.flag_bit.NEGATIVE) == CPU.flag_bit.NEGATIVE else "red",
-		"green" if (flags & CPU.flag_bit.OVERFLOW) == CPU.flag_bit.OVERFLOW else "red",
-		"green" if (flags & CPU.flag_bit.BREAK) == CPU.flag_bit.BREAK else "red",
-		"green" if (flags & CPU.flag_bit.BCD) == CPU.flag_bit.BCD else "red",
-		"green" if (flags & CPU.flag_bit.INTERRUPT) == CPU.flag_bit.INTERRUPT else "red",
-		"green" if (flags & CPU.flag_bit.ZERO) == CPU.flag_bit.ZERO else "red",
-		"green" if (flags & CPU.flag_bit.CARRY) == CPU.flag_bit.CARRY else "red",
+		"green" if (flags & CPU.FlagBit.NEGATIVE) == CPU.FlagBit.NEGATIVE else "red",
+		"green" if (flags & CPU.FlagBit.OVERFLOW) == CPU.FlagBit.OVERFLOW else "red",
+		"green" if (flags & CPU.FlagBit.BREAK) == CPU.FlagBit.BREAK else "red",
+		"green" if (flags & CPU.FlagBit.BCD) == CPU.FlagBit.BCD else "red",
+		"green" if (flags & CPU.FlagBit.INTERRUPT) == CPU.FlagBit.INTERRUPT else "red",
+		"green" if (flags & CPU.FlagBit.ZERO) == CPU.FlagBit.ZERO else "red",
+		"green" if (flags & CPU.FlagBit.CARRY) == CPU.FlagBit.CARRY else "red",
 	])
 
 

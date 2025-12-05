@@ -20,6 +20,6 @@ func _input(event: InputEvent) -> void:
 
 
 func step(steps:int = 1):
-	_status = status.PAUSED
+	_status = EmulationStatus.PAUSED
 	for s in range(steps):
 		execute(true)

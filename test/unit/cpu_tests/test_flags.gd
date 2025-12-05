@@ -28,29 +28,29 @@ var and_assembled := PackedByteArray([
 ])
 
 func test_flag_on():
-	cpu.set_flag(CPU.flag_bit.OVERFLOW, true)
-	assert_flag(CPU.flag_bit.OVERFLOW).is_true()
+	cpu.set_flag(CPU.FlagBit.OVERFLOW, true)
+	assert_flag(CPU.FlagBit.OVERFLOW).is_true()
 
-	cpu.set_flag(CPU.flag_bit.BCD, true)
-	assert_flag(CPU.flag_bit.BCD).is_true()
+	cpu.set_flag(CPU.FlagBit.BCD, true)
+	assert_flag(CPU.FlagBit.BCD).is_true()
 
-	cpu.set_flag(CPU.flag_bit.OVERFLOW, false)
-	assert_flag(CPU.flag_bit.OVERFLOW).is_false()
+	cpu.set_flag(CPU.FlagBit.OVERFLOW, false)
+	assert_flag(CPU.FlagBit.OVERFLOW).is_false()
 
 func test_negative_dec():
 	setup_assembly(negative_dec_str, negative_dec_assembled)
 	cpu.step()
 	assert_int(cpu.Y).is_equal(0x82)
-	assert_flag(CPU.flag_bit.NEGATIVE).is_true()
+	assert_flag(CPU.FlagBit.NEGATIVE).is_true()
 	cpu.step()
 	assert_int(cpu.Y).is_equal(0x81)
-	assert_flag(CPU.flag_bit.NEGATIVE).is_true()
+	assert_flag(CPU.FlagBit.NEGATIVE).is_true()
 	cpu.step()
 	assert_int(cpu.Y).is_equal(0x80)
-	assert_flag(CPU.flag_bit.NEGATIVE).is_true()
+	assert_flag(CPU.FlagBit.NEGATIVE).is_true()
 	cpu.step()
 	assert_int(cpu.Y).is_equal(0x7F)
-	assert_flag(CPU.flag_bit.NEGATIVE).is_false()
+	assert_flag(CPU.FlagBit.NEGATIVE).is_false()
 
 func test_and():
 	setup_assembly(and_str, and_assembled)

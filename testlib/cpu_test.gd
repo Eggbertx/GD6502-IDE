@@ -24,7 +24,7 @@ func setup_assembly(asm_str: String, expect_bytes: PackedByteArray):
 
 
 ## assert_flag tests the CPU flag state
-func assert_flag(flag: CPU.flag_bit) -> GdUnitBoolAssert:
+func assert_flag(flag: CPU.FlagBit) -> GdUnitBoolAssert:
 	return assert_bool(cpu.get_flag_state(flag))
 
 
